@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${titulo} ?: 'Error'">Error</title>
+    <style>
+        body { font-family: system-ui, Arial; margin: 2rem; }
+        .card { max-width: 680px; border: 1px solid #ddd; padding: 1.25rem; border-radius: 10px; }
+        .actions a { margin-right: 12px; }
+        pre { background: #f7f7f7; padding: .75rem; border-radius: 8px; overflow:auto }
+    </style>
+</head>
+<body>
+<h2 th:text="${titulo} ?: 'Ocurrió un error'">Ocurrió un error</h2>
+
+<div class="card">
+    <p th:text="${mensaje} ?: 'Ha ocurrido un error interno. Intenta de nuevo.'">
+        Ha ocurrido un error interno. Intenta de nuevo.
+    </p>
+
+    <div class="actions">
+        <!-- Si estás autenticado, volverá a la ruta de inicio de tu app -->
+        <a th:href="@{/}">Volver al inicio</a>
+        <!-- Acceso directo al login por si la sesión expiró -->
+        <a th:href="@{/login}">Ir al login</a>
+    </div>
+
+    <!-- Muestra la ruta que causó el error si Spring la expone -->
+    <div th:if="${errorPath != null}">
+        <h4>Ruta del error</h4>
+        <pre th:text="${errorPath}"></pre>
+    </div>
+
+</div>
+</body>
+</html>

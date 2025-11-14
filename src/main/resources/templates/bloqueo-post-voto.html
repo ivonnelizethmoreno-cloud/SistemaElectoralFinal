@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso Restringido</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 40px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 35px;
+            max-width: 550px;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+        h2 {
+            color: #b30000;
+            font-size: 22px;
+            margin-bottom: 30px;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 18px;
+            background-color: #0066cc;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            background-color: #004a99;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Señor(a) Ciudadano(a) usted ya votó, sólo se permite un intento</h2>
+
+    <a th:href="@{/login}">Ir al login</a>
+</div>
+
+</body>
+</html>

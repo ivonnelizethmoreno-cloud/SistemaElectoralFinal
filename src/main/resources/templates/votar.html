@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tarjetón de Votación - Senado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body { background-color: #f5f7fa; font-family: 'Segoe UI', sans-serif; }
+
+        .tarjeton {
+            max-width: 1100px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .tarjeta-partido {
+            background: #fafafa;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        .tarjeta-partido:hover {
+            background: #eef6ff;
+        }
+
+        .btn-candidato {
+            width: 36px;
+            height: 36px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .btn-check:checked + label {
+            background-color: #0056b3;
+            color: #fff;
+            border-color: #004a99;
+        }
+
+        .boton-voto {
+            display: block;
+            margin: 25px auto;
+            width: 220px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="tarjeton">
+
+    <!-- TÍTULO PRINCIPAL -->
+    <h2 class="text-center text-primary fw-bold mb-1">
+        🗳️ Tarjetón de Votación - Senado
+    </h2>
+
+    <!-- SUBTÍTULO: TIPO DE TARJETÓN -->
+    <h4 class="text-center text-success fw-bold mb-4"
+        th:text="'Tarjetón ' + (${tipoTarjeton} == 'ORDINARIO' ? 'Ordinario' : 'Indígena')">
+    </h4>
+
+    <!-- BOTÓN CAMBIAR TARJETÓN (solo votante indígena) -->
+    <div th:if="${circunscripcionVotante == 'INDIGENA'}"
+         class="text-center mb-4">
+
+        <a href="/votante"
+           class="btn btn-outline-secondary btn-sm">
+            Cambiar tipo de tarjetón
+        </a>
+    </div>
+
+    <!-- CONTADOR -->
+    <div id="contadorSesion" class="alert alert-warning text-center fw-bold"
+         style="font-size: 1.2rem; width: 300px; margin: 0 auto 20px auto;">
+        ⏰ Tiempo restante: <span id="tiempoRestante">05:00</span>
+    </div>
+
+    <!-- MENSAJE FLASH -->
+    <div th:if="${mensaje}" class="alert alert-info text-center" th:text="${mensaje}"></div>
+
+    <form th:action="@{/votante/emitir}" method="post" id="formVoto">
+
+        <!-- HIDDEN PARA EL CONTROLADOR -->
+        <input type="hidden" id="partidoId" name="partidoId">
+        <input type="hidden" id="candidatoId" name="candidatoId">
+
+        <!-- TARJETÓN -->
+        <div th:each="entry : ${partidos}" class="tarjeta-partido">
+            <div th:with="partido=${entry.key}, relaciones=${entry.value}"
+                 th:attr="data-partido-id=${partido.partidoId}">
+
+                <!-- NOMBRE PARTIDO -->
+                <h5 class="text-center text-primary fw-bold" th:text="${partido.nombre}"></h5>
+
+                <p class="text-center text-muted">
+                    Modalidad: <span th:text="${partido.tipoLista}"></span> –
+                    Circunscripción: <span th:text="${partido.circunscripcion}"></span>
+                </p>
+
+                <!-- LISTA ABIERTA -->
+                <div th:if="${#strings.equalsIgnoreCase(partido.tipoLista, 'abierta')}">
+
+                    <div class="d-flex flex-wrap justify-content-center">
+
+                        <div th:each="rel : ${relaciones}">
+                            <input type="radio"
+                                   name="candidatoId"
+                                   th:id="'cand-' + ${rel.candidato.cedula}"
+                                   th:value="${rel.candidato.cedula}"
+                                   class="btn-check voto-radio">
+
+                            <label th:for="'cand-' + ${rel.candidato.cedula}"
+                                   class="btn btn-outline-secondary btn-candidato"
+                                   th:title="${rel.candidato.nombre}"
+                                   th:text="${rel.ordenCandidatos}">
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <p class="text-center mt-2 text-muted small">
+                        Lista abierta – marque un número de candidato
+                    </p>
+                </div>
+
+                <!-- LISTA CERRADA -->
+                <div th:if="${#strings.equalsIgnoreCase(partido.tipoLista, 'cerrada')}"
+                     class="text-center">
+
+                    <input type="radio"
+                           name="partidoIdCerrado"
+                           th:id="'part-' + ${partido.partidoId}"
+                           th:value="${partido.partidoId}"
+                           class="btn-check voto-radio">
+
+                    <label th:for="'part-' + ${partido.partidoId}"
+                           class="btn btn-outline-primary btn-partido">
+                        <span th:text="${partido.nombre}"></span>
+                    </label>
+
+                    <p class="mt-2 text-muted small">
+                        Lista cerrada – marque solo el partido
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary boton-voto">Enviar voto</button>
+
+    </form>
+</div>
+
+<!-- CONFIRMACIÓN -->
+<script>
+    document.getElementById("formVoto").addEventListener("submit", function(e) {
+        const seleccionado = document.querySelector("input[type='radio']:checked");
+
+        if (!seleccionado) {
+            e.preventDefault();
+            alert("⚠️ Debes seleccionar un candidato o partido antes de enviar tu voto.");
+            return false;
+        }
+
+        const label = document.querySelector("label[for='" + seleccionado.id + "']");
+        const opcion = label ? label.textContent.trim() : seleccionado.value;
+
+        const confirmar = confirm("¿Confirmas tu voto por: " + opcion + "?");
+
+        if (!confirmar) e.preventDefault();
+    });
+</script>
+
+<!-- CONTADOR -->
+<script>
+    const DURACION = 5 * 60;
+    let tiempo = DURACION;
+
+    function actualizarContador() {
+        const minutos = Math.floor(tiempo / 60);
+        const segundos = tiempo % 60;
+
+        document.getElementById("tiempoRestante").textContent =
+            String(minutos).padStart(2, '0') + ":" + String(segundos).padStart(2, '0');
+
+        if (tiempo <= 0) {
+            clearInterval(intervalo);
+            alert("⏰ Tu sesión ha expirado. Serás redirigido.");
+            window.location.href = '/logout';
+        }
+
+        tiempo--;
+    }
+
+    const intervalo = setInterval(actualizarContador, 1000);
+    actualizarContador();
+</script>
+
+<!-- MAPEO DE SELECCIÓN PARA EL CONTROLADOR -->
+<script>
+    const radios = document.querySelectorAll(".voto-radio");
+
+    radios.forEach(r => {
+        r.addEventListener("change", () => {
+
+            radios.forEach(x => { if (x !== r) x.checked = false; });
+
+            const hiddenPartido = document.getElementById("partidoId");
+            const hiddenCandidato = document.getElementById("candidatoId");
+
+            if (r.name === "candidatoId") {
+                hiddenCandidato.value = r.value;
+
+                const card = r.closest(".tarjeta-partido");
+                const idPartido = card.getAttribute("data-partido-id");
+                hiddenPartido.value = idPartido;
+            }
+
+            if (r.name === "partidoIdCerrado") {
+                hiddenPartido.value = r.value;
+                hiddenCandidato.value = -1;
+            }
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

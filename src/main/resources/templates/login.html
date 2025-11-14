@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Acceso</title>
+    <style>
+        body { font-family: Arial; display:flex; height:100vh; align-items:center; justify-content:center; background:#f0f3f8; margin:0;}
+        .box { background:#fff; padding:28px; width:320px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.1); text-align:center;}
+        input, button { width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:6px; }
+        button { background:#004080; color:#fff; border:none; cursor:pointer; font-weight:bold;}
+        button:hover { background:#0066cc; }
+        .err { color:#c00; margin-top:8px; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>Acceso al Sistema</h2>
+    <form th:action="@{/login}" method="post">
+        <input type="text" name="username" placeholder="Usuario" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <button type="submit">Ingresar</button>
+    </form>
+    <div th:if="${param.error}" class="err">Usuario o contraseña inválidos</div>
+    <div th:if="${param.logout}">Sesión cerrada</div>
+</div>
+</body>
+</html>

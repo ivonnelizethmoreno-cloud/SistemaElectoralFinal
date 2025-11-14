@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio</title>
+</head>
+<body>
+<h2>Bienvenido al Sistema Electoral</h2>
+<p>Seleccione una opción:</p>
+
+<ul>
+    <li><a th:href="@{/login}">Iniciar sesión</a></li>
+    <li><a th:href="@{/votar}">Ir a votar</a></li>
+</ul>
+
+</body>
+</html>

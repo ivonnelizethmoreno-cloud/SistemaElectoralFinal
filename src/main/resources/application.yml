@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Votaciones
+    username: postgres
+    password: postgres2025
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        default_schema: votaciones_senado
+        format_sql: true
+        globally_quoted_identifiers: false
+        jdbc.lob.non_contextual_creation: true  # evita warning de LOBs en PostgreSQL
+
+server:
+  port: 8082
+  error:
+    include-message: always
+    include-binding-errors: always
+    whitelabel:
+      enabled: false
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.thymeleaf: TRACE

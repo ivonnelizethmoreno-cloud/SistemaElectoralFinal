@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados Electorales</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <h2 class="text-center mb-4">📊 Resultados Finales – Senado</h2>
+
+    <!-- ============================= -->
+    <!-- ESTADÍSTICAS GENERALES -->
+    <!-- ============================= -->
+    <div class="alert alert-info text-center">
+        Total votantes registrados: <b th:text="${totalVotantes}"></b> |
+        Votantes efectivos: <b th:text="${votantesEfectivos}"></b> |
+        Votos emitidos: <b th:text="${totalVotosEmitidos}"></b> |
+        Participación: <b th:text="${#numbers.formatDecimal(porcentajeParticipacion, 1, 2)} + '%'"></b>
+    </div>
+
+    <!-- ============================= -->
+    <!-- ✅ VERIFICACIÓN DE SUMATORIA -->
+    <!-- ============================= -->
+    <div class="alert mt-4"
+         th:classappend="${verificacionOk} ? 'alert-success' : 'alert-danger'">
+        <strong th:text="${verificacionOk} ?
+            '✅ Verificación correcta: la sumatoria de votos coincide con los votos efectivos.' :
+            '⚠️ Inconsistencia detectada: la sumatoria no coincide.'"></strong>
+        <br>
+        <span><b>Votos efectivos:</b> <span th:text="${votantesEfectivos}"></span></span><br>
+        <span><b>Votos por candidatos:</b> <span th:text="${sumaVotosCandidatos}"></span></span>
+    </div>
+
+    <!-- ============================= -->
+    <!-- TABLA DE RESULTADOS POR CANDIDATO -->
+    <!-- ============================= -->
+    <h4 class="mt-5">🧾 Distribución de votos por candidato</h4>
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-primary">
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Cédula Candidato</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Votos</th>
+            <th scope="col">% sobre total</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r, iterStat : ${resultados}">
+            <td th:text="${iterStat.count}"></td>
+            <td th:text="${r[0]}"></td>
+            <td th:text="${r[1]}"></td>
+            <td th:text="${r[2]}"></td>
+            <td th:text="${#numbers.formatDecimal((r[2] * 100.0) / sumaVotosCandidatos, 1, 2)} + '%'"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(resultados)}">
+            <td colspan="5" class="text-center text-muted">No hay votos registrados.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- ============================= -->
+    <!-- BOTONES DE NAVEGACIÓN -->
+    <!-- ============================= -->
+    <div class="text-center mt-4">
+        <a th:href="@{/admin}" class="btn btn-secondary px-4 me-2">Volver al Panel</a>
+        <a th:href="@{/logout}" class="btn btn-danger px-4">Cerrar Sesión</a>
+    </div>
+    <!-- ================================ -->
+    <!-- 🔵 BOTÓN PARA IR AL REPARTO DE CURULES -->
+    <!-- ================================ -->
+    <div class="text-center mt-4">
+        <a th:href="@{/admin/reparto-senado}" class="btn btn-info btn-lg px-4">
+            📊 Ver Reparto de Curules del Senado
+        </a>
+    </div>
+
+</div>
+</body>
+</html>

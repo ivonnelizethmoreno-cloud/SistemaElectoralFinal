@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reparto de Curules - Senado</title>
+
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+
+        h2 {
+            color: #003366;
+            border-bottom: 3px solid #003366;
+            padding-bottom: 5px;
+        }
+
+        .card {
+            background: #eef6ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #007bff;
+            margin-bottom: 20px;
+        }
+
+        .alert-ok {
+            background: #eaffea;
+            border-left: 5px solid #2ecc71;
+        }
+
+        .alert-warn {
+            background: #fff3e6;
+            border-left: 5px solid #f39c12;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back:hover {
+            background: #004c99;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>📊 Reparto de Curules – Senado</h2>
+
+<!-- Resumen general -->
+<div class="card">
+    <p><b>Total votos válidos:</b> <span th:text="${totalVotos}"></span></p>
+    <p><b>Umbral (3%):</b> <span th:text="${umbral}"></span></p>
+
+    <div th:if="${partidosUmbral != null}">
+        <p><b>Partidos que superan el umbral:</b></p>
+        <ul>
+            <li th:each="p : ${partidosUmbral}"
+                th:text="${p.key + ' (' + p.value + ' votos)'}"></li>
+        </ul>
+    </div>
+
+    <p><b>Cifra Repartidora:</b> <span th:text="${cifraRepartidora}"></span></p>
+</div>
+
+
+<!-- Matriz de divisiones (Método cifra repartidora) -->
+<div class="card">
+    <h3>📐 Tabla de divisiones sucesivas (Método cifra repartidora)</h3>
+
+    <table>
+        <thead>
+
+        <!-- 🔹 Cabecera SEGURA (solo si hay datos) -->
+        <tr th:if="${tablaDivisiones != null
+                    and !tablaDivisiones.isEmpty()
+                    and tablaDivisiones[0] != null
+                    and tablaDivisiones[0].valores != null
+                    and !tablaDivisiones[0].valores.isEmpty()}">
+
+            <th>Partido</th>
+
+            <th th:each="i : ${#numbers.sequence(1, tablaDivisiones[0].valores.size())}"
+                th:text="'División ' + i"></th>
+        </tr>
+
+        <!-- 🔹 Cabecera fallback (si NO hay datos) -->
+        <tr th:unless="${tablaDivisiones != null
+                        and !tablaDivisiones.isEmpty()
+                        and tablaDivisiones[0] != null
+                        and tablaDivisiones[0].valores != null
+                        and !tablaDivisiones[0].valores.isEmpty()}">
+            <th>Partido</th>
+            <th>No hay divisiones</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+        <tr th:each="row : ${tablaDivisiones}">
+            <td th:text="${row.partido}"></td>
+
+            <!-- Valores -->
+            <td th:each="v : ${row.valores}" th:text="${v}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Curules asignadas -->
+<div class="card alert-ok">
+    <h3>🪑 Curules asignadas por partido</h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Partido</th>
+            <th>Curules</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="entry : ${curules}">
+            <td th:text="${entry.key}"></td>
+            <td th:text="${entry.value}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<a href="/admin" class="back">⬅ Volver al panel</a>
+
+</body>
+</html>

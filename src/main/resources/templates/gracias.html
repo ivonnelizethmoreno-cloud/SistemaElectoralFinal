@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gracias por Votar</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            text-align: center;
+            padding-top: 100px;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            width: 400px;
+            margin: 0 auto;
+        }
+        h1 { color: #2b5797; }
+        .btn {
+            display: inline-block;
+            margin: 10px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+        }
+        .btn-cert {
+            background-color: #28a745;
+        }
+        .btn-login {
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>¡Gracias por tu voto!</h1>
+    <p>Tu participación ha sido registrada exitosamente.</p>
+
+    <a th:href="@{/certificado/descargar}" class="btn btn-cert">Descargar Certificado</a>
+    <a th:href="@{/login}" class="btn btn-login">Volver al inicio de sesión</a>
+</div>
+
+</body>
+</html>

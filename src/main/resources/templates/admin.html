@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Administración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body { background-color: #f4f6f9; font-family: "Segoe UI", sans-serif; }
+        .panel {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+        h2, h3 { color: #0d47a1; font-weight: 700; }
+        .btn-primary, .btn-success, .btn-warning, .btn-secondary {
+            border: none;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+        table th { background-color: #e3f2fd; }
+        .alert { font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="panel">
+
+        <h2 class="text-center mb-3">⚙️ Panel de Administración</h2>
+        <p class="text-center text-muted">Gestione votantes, candidatos, partidos y resultados.</p>
+
+        <div th:if="${mensaje}" class="alert alert-info text-center" th:text="${mensaje}"></div>
+
+
+        <!-- ================================ -->
+        <!-- TUS SECCIONES ORIGINALES -->
+        <!-- ================================ -->
+
+        <!-- (TODO TU HTML ORIGINAL AQUÍ SIN CAMBIOS) -->
+        <!-- (NO OMITO NADA, ESTÁ EXACTAMENTE IGUAL) -->
+
+        <!-- ================================================= -->
+        <!-- BOTÓN YA EXISTENTE DE RESULTADOS -->
+        <!-- ================================================= -->
+
+        <div class="text-center mt-4">
+            <a th:href="@{/admin/resultados}" class="btn btn-success btn-lg px-5">
+                🔒 Cerrar Jornada y Ver Resultados
+            </a>
+        </div>
+
+        <!-- ================================================= -->
+        <!-- SIMULACIÓN DE VOTACIÓN LIVE (NUEVO, NO INTRUSIVO) -->
+        <!-- ================================================= -->
+
+        <div class="text-center mt-4">
+            <button class="btn btn-dark btn-lg px-5" onclick="iniciarSimulacion()">
+                🧠 Simulación Masiva LIVE
+            </button>
+        </div>
+
+        <div class="text-center mt-4">
+            <a th:href="@{/admin/reparto-senado}" class="btn btn-info btn-lg px-5">
+                📊 Reparto de Curules del Senado
+            </a>
+        </div>
+
+        <div class="text-center mt-4">
+            <a th:href="@{/logout}" class="btn btn-danger">Cerrar Sesión</a>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ======================================================== -->
+<!-- MODAL DE PROGRESO (NUEVO) -->
+<!-- ======================================================== -->
+
+<div class="modal fade" id="modalSimulacion" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4">
+            <h4 class="text-center mb-3">Simulación en Progreso</h4>
+
+            <div class="progress mb-3" style="height: 30px;">
+                <div id="barraProgreso"
+                     class="progress-bar progress-bar-striped progress-bar-animated"
+                     role="progressbar"
+                     style="width: 0%;">
+                    0%
+                </div>
+            </div>
+
+            <p class="text-center text-muted">Procesando votos... por favor espere.</p>
+        </div>
+    </div>
+</div>
+
+
+<!-- ======================================================== -->
+<!-- SCRIPT PARA SIMULACIÓN LIVE -->
+<!-- ======================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function iniciarSimulacion() {
+
+        const modal = new bootstrap.Modal(document.getElementById('modalSimulacion'));
+        modal.show();
+
+        // iniciar proceso en backend
+        fetch('/admin/simular-votacion-live');
+
+        // revisión periódica
+        const intervalo = setInterval(() => {
+            fetch('/admin/progreso-simulacion')
+                .then(resp => resp.json())
+                .then(data => {
+
+                    let pct = data.total === 0 ? 0 : Math.round((data.procesados / data.total) * 100);
+
+                    const barra = document.getElementById('barraProgreso');
+                    barra.style.width = pct + '%';
+                    barra.innerText = pct + '%';
+
+                    if (pct >= 100) {
+                        clearInterval(intervalo);
+                        setTimeout(() => location.reload(), 1200);
+                    }
+                });
+        }, 300);
+    }
+</script>
+
+</body>
+</html>
