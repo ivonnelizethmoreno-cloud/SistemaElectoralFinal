@@ -32,7 +32,7 @@ public class VotoController {
     private final EligeRepository eligeRepository;
 
     // ===========================================================
-    // 🔹 MUESTRA TARJETÓN (con selector para votante indígena)
+    // 🔹 MUESTRA TARJETÓN
     // ===========================================================
     @GetMapping
     public String mostrarTarjeton(Authentication auth,
@@ -51,65 +51,45 @@ public class VotoController {
             redirectAttributes.addFlashAttribute("mensaje", "⚠️ Usuario no encontrado.");
             return "redirect:/login";
         }
-// 🔥 AQUÍ → BLOQUEO POST-LOGIN PARA USUARIO QUE YA VOTÓ
+
+        // 🔥 BLOQUEO SI YA VOTÓ
         if (usuario.isHaVotado()) {
             model.addAttribute("mensaje",
                     "Señor(a) Ciudadano(a) usted ya votó, sólo se permite un intento");
             return "bloqueo-post-voto";
         }
-        if (usuario.isHaVotado()) {
-            redirectAttributes.addFlashAttribute("mensaje", "⚠️ Ya emitiste tu voto.");
-            return "redirect:/votante/gracias";
-        }
 
-        // ================================
-        // 1️⃣ Normalizar circunscripción del votante
-        // ================================
+        // Normalización circunscripción
         String circVotNorm = normalize(usuario.getCircunscripcion());
 
-        // ================================
-        // 2️⃣ Mostrar selector SOLO si votante es indígena
-        // ================================
+        // Selector indígena
         if (circVotNorm.equals("INDIGENA") && tipoTarjeton == null) {
             model.addAttribute("usuario", usuario);
             model.addAttribute("esIndigena", true);
             return "votar_selector";
         }
 
-        // Si no seleccionó tipo y es ordinario → ordinario por defecto
         if (tipoTarjeton == null) tipoTarjeton = "ordinario";
-
-        // Normalizar tipoTarjeton recibido
         tipoTarjeton = tipoTarjeton.trim().toUpperCase(Locale.ROOT);
 
-        // Copias effectively-final para usar dentro del stream (SOLUCIÓN ERROR)
         final String circVotFinal = circVotNorm;
         final String tipoTarjFinal = tipoTarjeton;
 
-        // ================================
-        // 3️⃣ Traer pertenencias y filtrar por circunscripción y tarjetón
-        // ================================
+        // Obtener pertenencias filtradas
         List<Pertenece> filtradas = perteneceRepository.findAllConPartidoYCandidato()
                 .stream()
                 .filter(p -> {
-
                     String cp = normalize(p.getPartido().getCircunscripcion());
                     String cc = normalize(p.getCandidato().getCircunscripcion());
 
-                    // ======== VOTANTE ORDINARIO ========
                     if (circVotFinal.equals("ORDINARIA")) {
                         return cp.equals("ORDINARIA") && cc.equals("ORDINARIA");
                     }
 
-                    // ======== VOTANTE INDÍGENA ========
                     if (circVotFinal.equals("INDIGENA")) {
-
-                        // Tarjetón ORDINARIO
                         if (tipoTarjFinal.equals("ORDINARIO")) {
                             return cp.equals("ORDINARIA") && cc.equals("ORDINARIA");
                         }
-
-                        // Tarjetón INDÍGENA
                         if (tipoTarjFinal.equals("INDIGENA")) {
                             return cp.equals("INDIGENA") && cc.equals("INDIGENA");
                         }
@@ -120,9 +100,7 @@ public class VotoController {
                 .sorted(Comparator.comparing(p -> p.getPartido().getPartidoId()))
                 .collect(Collectors.toList());
 
-        // ================================
-        // 4️⃣ Agrupar por partido
-        // ================================
+        // Agrupar por partido
         Map<Partido, List<Pertenece>> agrupadas = new LinkedHashMap<>();
         filtradas.forEach(p ->
                 agrupadas.computeIfAbsent(p.getPartido(), k -> new ArrayList<>()).add(p)
@@ -140,13 +118,10 @@ public class VotoController {
         return "votar";
     }
 
-    // ===========================================================
-    // 🔹 Normalizador robusto de circunscripciones
-    // ===========================================================
+    // Normalizador
     private String normalize(String s) {
         if (s == null) return "";
-        s = s.trim().toUpperCase(Locale.ROOT)
-                .replaceAll("[^A-Z]", "");
+        s = s.trim().toUpperCase(Locale.ROOT).replaceAll("[^A-Z]", "");
 
         if (s.startsWith("ORD")) return "ORDINARIA";
         if (s.startsWith("IND")) return "INDIGENA";
@@ -155,11 +130,11 @@ public class VotoController {
     }
 
     // ===========================================================
-    // 🔹 REGISTRAR VOTO
+    // 🔹 REGISTRAR VOTO (INCLUYE VOTO EN BLANCO)
     // ===========================================================
     @PostMapping("/emitir")
     public String emitirVoto(
-            @RequestParam(name = "candidatoId", required = false) Long candidatoId,
+            @RequestParam(name = "candidatoIdHidden", required = false) String candidatoIdRaw,
             @RequestParam(name = "partidoIdCerrado", required = false) Long partidoIdCerrado,
             RedirectAttributes redirect,
             Authentication auth) {
@@ -170,6 +145,7 @@ public class VotoController {
         }
 
         UserAccount usuario = userAccountRepository.findByUsername(auth.getName());
+
         if (usuario == null) {
             redirect.addFlashAttribute("mensaje", "⚠️ Usuario no encontrado.");
             return "redirect:/login";
@@ -180,9 +156,24 @@ public class VotoController {
             return "redirect:/votante/gracias";
         }
 
-        Long candidatoFinal;
+        Long candidatoFinal = null;
 
-        if (partidoIdCerrado != null) {
+        // 🟨 VOTO EN BLANCO
+        if ("BLANCO".equalsIgnoreCase(candidatoIdRaw)) {
+
+            String circ = normalize(usuario.getCircunscripcion());
+
+            if (circ.equals("ORDINARIA")) candidatoFinal = 9000000001L;
+            else if (circ.equals("INDIGENA")) candidatoFinal = 9000000002L;
+            else {
+                redirect.addFlashAttribute("mensaje", "❌ Error procesando voto en blanco.");
+                return "redirect:/votante";
+            }
+        }
+
+        // 🎯 LISTA CERRADA
+        else if (partidoIdCerrado != null) {
+
             List<Pertenece> lista =
                     perteneceRepository.findByPartido_PartidoIdOrderByOrdenCandidatosAsc(partidoIdCerrado);
 
@@ -193,14 +184,23 @@ public class VotoController {
 
             candidatoFinal = lista.get(0).getCandidato().getCedula();
         }
-        else if (candidatoId != null) {
-            candidatoFinal = candidatoId;
+
+        // 🎯 LISTA ABIERTA
+        else if (candidatoIdRaw != null) {
+            try {
+                candidatoFinal = Long.parseLong(candidatoIdRaw);
+            } catch (Exception e) {
+                redirect.addFlashAttribute("mensaje", "❌ Opción inválida.");
+                return "redirect:/votante";
+            }
         }
+
         else {
             redirect.addFlashAttribute("mensaje", "⚠️ Debes seleccionar una opción.");
             return "redirect:/votante";
         }
 
+        // Validar candidato
         var candidato = candidatoRepository.findById(candidatoFinal).orElse(null);
 
         if (candidato == null) {
@@ -208,10 +208,13 @@ public class VotoController {
             return "redirect:/votante";
         }
 
-        UUID hash = UUID.nameUUIDFromBytes(usuario.getUsername().getBytes());
+        // Guardar voto
+        /*UUID hash = UUID.nameUUIDFromBytes(usuario.getUsername().getBytes());*/
+        UUID hash = UUID.randomUUID();
 
         Elige voto = Elige.builder()
-                .hashVotante(hash)
+                /*.hashVotante(hash)*/
+                .hashVotante(UUID.randomUUID())
                 .candidato(candidato)
                 .build();
 

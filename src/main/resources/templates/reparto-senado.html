@@ -13,6 +13,10 @@
             padding-bottom: 5px;
         }
 
+        h3 {
+            color: #0056a3;
+        }
+
         .card {
             background: #eef6ff;
             padding: 15px;
@@ -29,6 +33,11 @@
         .alert-warn {
             background: #fff3e6;
             border-left: 5px solid #f39c12;
+        }
+
+        .alert-indigo {
+            background: #f1eaff;
+            border-left: 5px solid #7d3cff;
         }
 
         table {
@@ -60,6 +69,11 @@
         .back:hover {
             background: #004c99;
         }
+
+        .winner {
+            background-color: #dff8d8 !important;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -84,43 +98,30 @@
 </div>
 
 
-<!-- Matriz de divisiones (Método cifra repartidora) -->
+<!-- Matriz de divisiones -->
 <div class="card">
     <h3>📐 Tabla de divisiones sucesivas (Método cifra repartidora)</h3>
 
     <table>
         <thead>
-
-        <!-- 🔹 Cabecera SEGURA (solo si hay datos) -->
-        <tr th:if="${tablaDivisiones != null
-                    and !tablaDivisiones.isEmpty()
-                    and tablaDivisiones[0] != null
-                    and tablaDivisiones[0].valores != null
-                    and !tablaDivisiones[0].valores.isEmpty()}">
+        <tr th:if="${tablaDivisiones != null and !tablaDivisiones.isEmpty()
+                and tablaDivisiones[0] != null and tablaDivisiones[0].valores != null
+                and !tablaDivisiones[0].valores.isEmpty()}">
 
             <th>Partido</th>
-
             <th th:each="i : ${#numbers.sequence(1, tablaDivisiones[0].valores.size())}"
                 th:text="'División ' + i"></th>
         </tr>
 
-        <!-- 🔹 Cabecera fallback (si NO hay datos) -->
-        <tr th:unless="${tablaDivisiones != null
-                        and !tablaDivisiones.isEmpty()
-                        and tablaDivisiones[0] != null
-                        and tablaDivisiones[0].valores != null
-                        and !tablaDivisiones[0].valores.isEmpty()}">
+        <tr th:unless="${tablaDivisiones != null and !tablaDivisiones.isEmpty()}">
             <th>Partido</th>
             <th>No hay divisiones</th>
         </tr>
-
         </thead>
 
         <tbody>
         <tr th:each="row : ${tablaDivisiones}">
             <td th:text="${row.partido}"></td>
-
-            <!-- Valores -->
             <td th:each="v : ${row.valores}" th:text="${v}"></td>
         </tr>
         </tbody>
@@ -128,9 +129,9 @@
 </div>
 
 
-<!-- Curules asignadas -->
+<!-- Curules asignadas ordinarias -->
 <div class="card alert-ok">
-    <h3>🪑 Curules asignadas por partido</h3>
+    <h3>🪑 Curules ordinarias asignadas (100)</h3>
 
     <table>
         <thead>
@@ -141,13 +142,40 @@
         </thead>
 
         <tbody>
-        <tr th:each="entry : ${curules}">
+        <tr th:each="entry : ${curulesOrdinarias}">
             <td th:text="${entry.key}"></td>
             <td th:text="${entry.value}"></td>
         </tr>
         </tbody>
     </table>
 </div>
+
+
+<!-- Curules indígenas -->
+<div class="card alert-indigo">
+    <h3>🌿 Curules indígenas asignadas (2)</h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Candidato indígena</th>
+            <th>Votos</th>
+            <th>¿Gana curul?</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="ind,iter : ${curulesIndigenas}"
+            th:classappend="${iter.index < 2} ? 'winner'">
+
+            <td th:text="${ind.candidato}"></td>
+            <td th:text="${ind.votos}"></td>
+            <td th:text="${iter.index < 2 ? '✔ Sí' : '✖ No'}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
 
 <a href="/admin" class="back">⬅ Volver al panel</a>
 

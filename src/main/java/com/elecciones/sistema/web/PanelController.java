@@ -29,12 +29,10 @@ public class PanelController {
     private final PartidoRepository partidoRepository;
     private final PasswordEncoder passwordEncoder;
     private final RepartoSenadoService repartoService;
-
-    // ⭐ NUEVO — NO reemplaza nada
     private final SimulacionProgresoService progresoService;
 
     // ===========================================================
-    // PANEL PRINCIPAL (TU CÓDIGO, INTACTO)
+    // PANEL PRINCIPAL
     // ===========================================================
     @GetMapping
     public String adminPanel(Model model) {
@@ -42,8 +40,7 @@ public class PanelController {
             model.addAttribute("usuarios", userAccountRepository.findAll().stream().limit(10).toList());
             model.addAttribute("candidatos", candidatoRepository.findAll().stream().limit(10).toList());
             model.addAttribute("partidos", partidoRepository.findAll().stream().limit(10).toList());
-            model.addAttribute("pertenencias",
-                    perteneceRepository.findAllConPartidoYCandidato().stream().limit(20).toList());
+            model.addAttribute("pertenencias", perteneceRepository.findAll().stream().limit(20).toList());
 
             model.addAttribute("totalUsuarios", userAccountRepository.count());
             model.addAttribute("totalCandidatos", candidatoRepository.count());
@@ -57,127 +54,48 @@ public class PanelController {
     }
 
     // ===========================================================
-    // CARGA DE ORDEN DE LISTAS (TU CÓDIGO ORIGINAL)
-    // ===========================================================
-    @PostMapping("/cargar-listas")
-    public String cargarOrdenListas(@RequestParam("file") MultipartFile file, Model model) {
-        int creados = 0, actualizados = 0, ignorados = 0, lineaN = 0;
-
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-
-            List<String> lineas = leerCsvLimpio(reader);
-            if (lineas.isEmpty()) {
-                model.addAttribute("mensaje", "❌ Archivo vacío.");
-                return adminPanel(model);
-            }
-
-            String[] h = splitCsv(lineas.get(0));
-            if (h.length < 3 ||
-                    !eq(h[0], "Orden_Candidatos") ||
-                    !eq(h[1], "Partido_id") ||
-                    !eq(h[2], "Cedula_Candidato")) {
-
-                model.addAttribute("mensaje",
-                        "❌ Encabezado inválido (debe tener: Orden_Candidatos, Partido_id, Cedula_Candidato).");
-                return adminPanel(model);
-            }
-
-            for (int i = 1; i < lineas.size(); i++) {
-                lineaN++;
-                String[] c = splitCsv(lineas.get(i));
-                if (c.length < 3) { ignorados++; continue; }
-
-                String ordenTxt = limpiarTexto(c[0]);
-                String partidoTxt = limpiarTexto(c[1]);
-                String cedulaTxt = limpiarTexto(c[2]);
-
-                if (partidoTxt.isEmpty() || cedulaTxt.isEmpty() || ordenTxt.isEmpty()) {
-                    ignorados++; continue;
-                }
-
-                Long partidoId, cedula;
-                int orden;
-                try {
-                    partidoId = Long.parseLong(partidoTxt);
-                    cedula = Long.parseLong(cedulaTxt);
-                    orden = Integer.parseInt(ordenTxt);
-                } catch (NumberFormatException e) {
-                    ignorados++; continue;
-                }
-
-                var partido = partidoRepository.findById(partidoId).orElse(null);
-                var candidato = candidatoRepository.findById(cedula).orElse(null);
-                if (partido == null || candidato == null) {
-                    ignorados++;
-                    continue;
-                }
-
-                var existente = perteneceRepository.findByPartido_PartidoIdAndCandidato_Cedula(partidoId, cedula);
-
-                if (existente.isPresent()) {
-                    var rel = existente.get();
-                    rel.setOrdenCandidatos(orden);
-                    perteneceRepository.save(rel);
-                    actualizados++;
-                } else {
-                    var rel = new Pertenece();
-                    rel.setPartido(partido);
-                    rel.setCandidato(candidato);
-                    rel.setOrdenCandidatos(orden);
-                    perteneceRepository.save(rel);
-                    creados++;
-                }
-            }
-
-            model.addAttribute("mensaje", String.format(
-                    "✅ Orden de listas cargado correctamente. %d creados, %d actualizados, %d ignorados.",
-                    creados, actualizados, ignorados
-            ));
-
-        } catch (Exception e) {
-            model.addAttribute("mensaje",
-                    "❌ Error al cargar orden de listas (línea " + lineaN + "): " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return adminPanel(model);
-    }
-
-    // ===========================================================
-    // 🟦 CARGAR PARTIDOS (TU IMPLEMENTACIÓN)
+    // 🟨 CARGA DE PARTIDOS
     // ===========================================================
     @PostMapping("/cargar-partidos")
-    public String cargarPartidos(@RequestParam("file") MultipartFile file,
-                                 RedirectAttributes redirect) {
+    public String cargarPartidos(@RequestParam("file") MultipartFile file, RedirectAttributes redirect) {
 
         int creados = 0, actualizados = 0, ignorados = 0;
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
 
-            List<String> lineas = reader.lines().toList();
+            List<String> lineas = leerCsv(reader);
             if (lineas.isEmpty()) {
                 redirect.addFlashAttribute("mensaje", "❌ Archivo vacío.");
                 return "redirect:/admin";
             }
 
-            for (int i = 1; i < lineas.size(); i++) {
-                String[] c = lineas.get(i).split("[,;\\t]", -1);
-                if (c.length < 4) { ignorados++; continue; }
+            String[] h = splitCsv(lineas.get(0));
 
-                String idTxt = c[0].trim();
+            if (!encabezado(h, "Partido_id", "Nombre_Partido", "Tipo_Lista", "Circunscripcion_Partido")) {
+                redirect.addFlashAttribute("mensaje", "❌ Encabezado inválido para Partidos.");
+                return "redirect:/admin";
+            }
+
+            for (int i = 1; i < lineas.size(); i++) {
+                String[] c = splitCsv(lineas.get(i));
+                if (c.length < 4) {
+                    ignorados++;
+                    continue;
+                }
+
+                String id = c[0].trim();
                 String nombre = c[1].trim();
                 String tipo = c[2].trim();
                 String circ = c[3].trim();
 
-                if (idTxt.isEmpty() || nombre.isEmpty() || tipo.isEmpty() || circ.isEmpty()) {
-                    ignorados++; continue;
+                if (id.isEmpty() || nombre.isEmpty()) {
+                    ignorados++;
+                    continue;
                 }
 
-                Long partidoId = Long.parseLong(idTxt);
-
-                var existente = partidoRepository.findById(partidoId);
+                Long partidoId = Long.parseLong(id);
+                Optional<Partido> existente = partidoRepository.findById(partidoId);
 
                 if (existente.isPresent()) {
                     Partido p = existente.get();
@@ -186,7 +104,6 @@ public class PanelController {
                     p.setCircunscripcion(circ);
                     partidoRepository.save(p);
                     actualizados++;
-
                 } else {
                     Partido p = new Partido();
                     p.setPartidoId(partidoId);
@@ -199,47 +116,59 @@ public class PanelController {
             }
 
             redirect.addFlashAttribute("mensaje",
-                    "🏛️ Partidos cargados: " + creados + " creados, " + actualizados + " actualizados.");
+                    "🏛️ Partidos cargados: " + creados + " nuevos, " + actualizados + " actualizados.");
 
         } catch (Exception e) {
             redirect.addFlashAttribute("mensaje",
-                    "❌ Error al cargar partidos: " + e.getMessage());
+                    "❌ Error cargando PARTIDOS: " + e.getMessage());
         }
 
         return "redirect:/admin";
     }
 
     // ===========================================================
-    // 🟧 CARGAR CANDIDATOS (TU IMPLEMENTACIÓN)
+    // 🟦 CARGA DE CANDIDATOS
     // ===========================================================
     @PostMapping("/cargar-candidatos")
-    public String cargarCandidatos(@RequestParam("file") MultipartFile file,
-                                   RedirectAttributes redirect) {
+    public String cargarCandidatos(@RequestParam("file") MultipartFile file, RedirectAttributes redirect) {
 
         int creados = 0, actualizados = 0, ignorados = 0;
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
 
-            List<String> lineas = reader.lines().toList();
+            List<String> lineas = leerCsv(reader);
             if (lineas.isEmpty()) {
                 redirect.addFlashAttribute("mensaje", "❌ Archivo vacío.");
                 return "redirect:/admin";
             }
 
-            for (int i = 1; i < lineas.size(); i++) {
-                String[] c = lineas.get(i).split("[,;\\t]", -1);
-                if (c.length < 3) { ignorados++; continue; }
+            String[] h = splitCsv(lineas.get(0));
 
-                String cedTxt = c[0].trim();
+            if (!encabezado(h, "Cedula_Candidato", "Nombre_Candidato", "Circunscripcion_Candidato")) {
+                redirect.addFlashAttribute("mensaje", "❌ Encabezado inválido para Candidatos.");
+                return "redirect:/admin";
+            }
+
+            for (int i = 1; i < lineas.size(); i++) {
+
+                String[] c = splitCsv(lineas.get(i));
+                if (c.length < 3) {
+                    ignorados++;
+                    continue;
+                }
+
+                String ced = c[0].trim();
                 String nombre = c[1].trim();
                 String circ = c[2].trim();
 
-                Long cedula;
-                try { cedula = Long.parseLong(cedTxt); }
-                catch (Exception ex) { ignorados++; continue; }
+                if (ced.isEmpty() || nombre.isEmpty()) {
+                    ignorados++;
+                    continue;
+                }
 
-                var existente = candidatoRepository.findById(cedula);
+                Long cedula = Long.parseLong(ced);
+                Optional<Candidato> existente = candidatoRepository.findById(cedula);
 
                 if (existente.isPresent()) {
                     Candidato cand = existente.get();
@@ -259,46 +188,58 @@ public class PanelController {
             }
 
             redirect.addFlashAttribute("mensaje",
-                    "🧑‍💼 Candidatos cargados: " + creados + " creados, " + actualizados + " actualizados.");
+                    "🧑‍💼 Candidatos cargados: " + creados + " nuevos, " + actualizados + " actualizados.");
 
         } catch (Exception e) {
             redirect.addFlashAttribute("mensaje",
-                    "❌ Error al cargar candidatos: " + e.getMessage());
+                    "❌ Error cargando CANDIDATOS: " + e.getMessage());
         }
 
         return "redirect:/admin";
     }
 
     // ===========================================================
-    // 🟩 CARGAR VOTANTES (TU IMPLEMENTACIÓN)
+    // 🟩 CARGA DE VOTANTES
     // ===========================================================
     @PostMapping("/cargar-votantes")
-    public String cargarVotantes(@RequestParam("file") MultipartFile file,
-                                 RedirectAttributes redirect) {
+    public String cargarVotantes(@RequestParam("file") MultipartFile file, RedirectAttributes redirect) {
 
         int creados = 0, actualizados = 0, ignorados = 0;
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
 
-            List<String> lineas = reader.lines().toList();
+            List<String> lineas = leerCsv(reader);
             if (lineas.isEmpty()) {
                 redirect.addFlashAttribute("mensaje", "❌ Archivo vacío.");
                 return "redirect:/admin";
             }
 
-            for (int i = 1; i < lineas.size(); i++) {
-                String[] c = lineas.get(i).split("[,;\\t]", -1);
-                if (c.length < 4) { ignorados++; continue; }
+            String[] h = splitCsv(lineas.get(0));
 
-                String username = c[0].trim();
+            if (!encabezado(h, "Cedula_Votante", "Nombre_Votante", "Correo_Votante", "Circunscripcion_Votante")) {
+                redirect.addFlashAttribute("mensaje", "❌ Encabezado inválido para Votantes.");
+                return "redirect:/admin";
+            }
+
+            for (int i = 1; i < lineas.size(); i++) {
+                String[] c = splitCsv(lineas.get(i));
+                if (c.length < 4) {
+                    ignorados++;
+                    continue;
+                }
+
+                String ced = c[0].trim();
                 String nombre = c[1].trim();
                 String correo = c[2].trim();
                 String circ = c[3].trim();
 
-                if (username.isEmpty()) { ignorados++; continue; }
+                if (ced.isEmpty()) {
+                    ignorados++;
+                    continue;
+                }
 
-                var existente = userAccountRepository.findByUsername(username);
+                UserAccount existente = userAccountRepository.findByUsername(ced);
 
                 if (existente != null) {
                     existente.setNombreUsuario(nombre);
@@ -309,11 +250,11 @@ public class PanelController {
 
                 } else {
                     UserAccount u = new UserAccount();
-                    u.setUsername(username);
+                    u.setUsername(ced);
                     u.setNombreUsuario(nombre);
                     u.setCorreoElectronico(correo);
                     u.setCircunscripcion(circ);
-                    u.setPassword(passwordEncoder.encode("123"));
+                    u.setPassword(passwordEncoder.encode(ced));
                     u.setRole("VOTANTE");
                     u.setHaVotado(false);
                     userAccountRepository.save(u);
@@ -322,90 +263,152 @@ public class PanelController {
             }
 
             redirect.addFlashAttribute("mensaje",
-                    "🗳️ Votantes cargados: " + creados + " creados, " + actualizados + " actualizados.");
+                    "🗳️ Votantes cargados: " + creados + " nuevos, " + actualizados + " actualizados.");
 
         } catch (Exception e) {
             redirect.addFlashAttribute("mensaje",
-                    "❌ Error al cargar votantes: " + e.getMessage());
+                    "❌ Error cargando VOTANTES: " + e.getMessage());
         }
 
         return "redirect:/admin";
     }
 
     // ===========================================================
-    // 🧠 SIMULACIÓN ORIGINAL (INVIOLADA)
+    // CARGA DE LISTAS (PERTENECE)
     // ===========================================================
-    @GetMapping("/simular-votacion")
-    public String simularVotacion(RedirectAttributes redirectAttributes) {
+    @PostMapping("/cargar-listas")
+    public String cargarOrdenListas(@RequestParam("file") MultipartFile file, Model model) {
 
-        try {
-            List<UserAccount> votantes = userAccountRepository.findAll()
-                    .stream()
-                    .filter(u -> "VOTANTE".equalsIgnoreCase(u.getRole()) && !u.isHaVotado())
-                    .toList();
+        int creados = 0, actualizados = 0, ignorados = 0;
 
-            List<Candidato> candidatos = candidatoRepository.findAll();
-            Random random = new Random();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
 
-            for (UserAccount votante : votantes) {
-
-                List<Candidato> candidatosCirc = candidatos.stream()
-                        .filter(c -> c.getCircunscripcion().equalsIgnoreCase(votante.getCircunscripcion()))
-                        .toList();
-
-                if (candidatosCirc.isEmpty())
-                    continue;
-
-                List<Partido> partidosCirc = partidoRepository.findAll().stream()
-                        .filter(p -> p.getCircunscripcion().equalsIgnoreCase(votante.getCircunscripcion()))
-                        .toList();
-
-                Partido partidoElegido = partidosCirc.get(random.nextInt(partidosCirc.size()));
-
-                List<Pertenece> lista = perteneceRepository
-                        .findByPartido_PartidoIdOrderByOrdenCandidatosAsc(partidoElegido.getPartidoId());
-
-                Candidato elegido;
-
-                if (lista.isEmpty()) {
-                    elegido = candidatosCirc.get(random.nextInt(candidatosCirc.size()));
-                } else {
-
-                    if ("Cerrada".equalsIgnoreCase(partidoElegido.getTipoLista())) {
-                        elegido = lista.get(0).getCandidato();
-                    } else {
-                        elegido = lista.get(random.nextInt(lista.size())).getCandidato();
-                    }
-                }
-
-                Elige voto = new Elige();
-                voto.setHashVotante(UUID.randomUUID());
-                voto.setCandidato(elegido);
-                eligeRepository.save(voto);
-
-                votante.setHaVotado(true);
-                userAccountRepository.save(votante);
+            List<String> lineas = leerCsv(reader);
+            if (lineas.isEmpty()) {
+                model.addAttribute("mensaje", "❌ Archivo vacío.");
+                return adminPanel(model);
             }
 
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "🎯 Simulación completada: " + votantes.size() + " votos generados correctamente.");
+            String[] h = splitCsv(lineas.get(0));
+
+            if (!encabezado(h, "Orden_Candidatos", "Partido_id", "Cedula_Candidato")) {
+                model.addAttribute("mensaje",
+                        "❌ Encabezado inválido (Orden_Candidatos;Partido_id;Cedula_Candidato)");
+                return adminPanel(model);
+            }
+
+            for (int i = 1; i < lineas.size(); i++) {
+                String[] c = splitCsv(lineas.get(i));
+                if (c.length < 3) {
+                    ignorados++;
+                    continue;
+                }
+
+                String ordenTxt = c[0].trim();
+                String partidoTxt = c[1].trim();
+                String cedulaTxt = c[2].trim();
+
+                if (ordenTxt.isEmpty() || partidoTxt.isEmpty() || cedulaTxt.isEmpty()) {
+                    ignorados++;
+                    continue;
+                }
+
+                Long partidoId = Long.parseLong(partidoTxt);
+                Long cedula = Long.parseLong(cedulaTxt);
+                int orden = Integer.parseInt(ordenTxt);
+
+                Optional<Partido> partido = partidoRepository.findById(partidoId);
+                Optional<Candidato> candidato = candidatoRepository.findById(cedula);
+
+                if (partido.isEmpty() || candidato.isEmpty()) {
+                    ignorados++;
+                    continue;
+                }
+
+                Optional<Pertenece> existente =
+                        perteneceRepository.findByPartido_PartidoIdAndCandidato_Cedula(partidoId, cedula);
+
+                if (existente.isPresent()) {
+                    Pertenece p = existente.get();
+                    p.setOrdenCandidatos(orden);
+                    perteneceRepository.save(p);
+                    actualizados++;
+
+                } else {
+                    Pertenece p = new Pertenece();
+                    p.setPartido(partido.get());
+                    p.setCandidato(candidato.get());
+                    p.setOrdenCandidatos(orden);
+                    perteneceRepository.save(p);
+                    creados++;
+                }
+            }
+
+            model.addAttribute("mensaje",
+                    "📋 Orden cargado: " + creados + " nuevos, " + actualizados + " actualizados.");
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "❌ Error durante la simulación: " + e.getMessage());
+            model.addAttribute("mensaje",
+                    "❌ Error cargando LISTAS: " + e.getMessage());
         }
 
-        return "redirect:/admin";
+        return adminPanel(model);
     }
 
     // ===========================================================
-    // ⭐⭐ NUEVO: SIMULACIÓN LIVE SIN ROMPER TU LÓGICA ⭐⭐
+    // UTILIDADES DE CSV (CORREGIDAS)
+    // ===========================================================
+
+    private static List<String> leerCsv(BufferedReader reader) throws Exception {
+        List<String> out = new ArrayList<>();
+        String line;
+        boolean first = true;
+        while ((line = reader.readLine()) != null) {
+            if (first) {
+                line = removerBOM(line);
+                first = false;
+            }
+            if (!line.trim().isEmpty())
+                out.add(line);
+        }
+        return out;
+    }
+
+    private static String removerBOM(String s) {
+        if (s != null && !s.isEmpty() && s.charAt(0) == '\uFEFF')
+            return s.substring(1);
+        return s;
+    }
+
+    // ❗ CSV REAL: SE USA SÓLO `;` COMO SEPARADOR
+    private static String[] splitCsv(String line) {
+        return line.split(";", -1);
+    }
+
+    // ✔ Encabezado flexible: compara sin eliminar caracteres válidos
+    private static boolean encabezado(String[] arr, String... esperado) {
+        if (arr.length < esperado.length) return false;
+        for (int i = 0; i < esperado.length; i++) {
+            if (!arr[i].trim().equalsIgnoreCase(esperado[i])) return false;
+        }
+        return true;
+    }
+
+    // ===========================================================
+    // SIMULACIÓN LIVE – CON PORCENTAJE
     // ===========================================================
     @GetMapping("/simular-votacion-live")
     @ResponseBody
-    public Map<String, Object> simularVotacionLive() {
+    public Map<String, Object> simularVotacionLive(
+            @RequestParam(name = "p", defaultValue = "10") int porcentaje) {
 
-        List<UserAccount> votantes = userAccountRepository.findAll()
+        // Normalizar porcentaje (entre 1 y 100)
+        if (porcentaje < 1) porcentaje = 1;
+        if (porcentaje > 100) porcentaje = 100;
+
+        // Votantes pendientes de votar
+        List<UserAccount> votantesPendientes = userAccountRepository.findAll()
                 .stream()
                 .filter(u -> "VOTANTE".equalsIgnoreCase(u.getRole()) && !u.isHaVotado())
                 .toList();
@@ -413,102 +416,103 @@ public class PanelController {
         List<Candidato> candidatos = candidatoRepository.findAll();
         Random random = new Random();
 
-        progresoService.reset(votantes.size());
-
-        for (UserAccount votante : votantes) {
-
-            List<Candidato> candidatosCirc = candidatos.stream()
-                    .filter(c -> c.getCircunscripcion().equalsIgnoreCase(votante.getCircunscripcion()))
-                    .toList();
-
-            if (candidatosCirc.isEmpty()) {
-                progresoService.aumentar();
-                continue;
-            }
-
-            List<Partido> partidosCirc = partidoRepository.findAll().stream()
-                    .filter(p -> p.getCircunscripcion().equalsIgnoreCase(votante.getCircunscripcion()))
-                    .toList();
-
-            Partido partidoElegido = partidosCirc.get(random.nextInt(partidosCirc.size()));
-
-            List<Pertenece> lista = perteneceRepository
-                    .findByPartido_PartidoIdOrderByOrdenCandidatosAsc(partidoElegido.getPartidoId());
-
-            Candidato elegido;
-
-            if (lista.isEmpty()) {
-                elegido = candidatosCirc.get(random.nextInt(candidatosCirc.size()));
-            } else {
-                if ("Cerrada".equalsIgnoreCase(partidoElegido.getTipoLista())) {
-                    elegido = lista.get(0).getCandidato();
-                } else {
-                    elegido = lista.get(random.nextInt(lista.size())).getCandidato();
-                }
-            }
-
-            Elige voto = new Elige();
-            voto.setHashVotante(UUID.randomUUID());
-            voto.setCandidato(elegido);
-            eligeRepository.save(voto);
-
-            votante.setHaVotado(true);
-            userAccountRepository.save(votante);
-
-            progresoService.aumentar();
-
-            try { Thread.sleep(40); } catch (Exception ignored) {}
+        if (votantesPendientes.isEmpty()) {
+            progresoService.reset(0);
+            return Map.of("status", "empty", "message", "No hay votantes pendientes.");
         }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("status", "done");
-        return result;
+        if (candidatos.isEmpty()) {
+            progresoService.reset(0);
+            return Map.of("status", "error", "message", "No hay candidatos cargados.");
+        }
+
+        // Cuántos voy a simular según el porcentaje
+        int totalPendientes = votantesPendientes.size();
+        int cantidadASimular = (int) Math.round(totalPendientes * (porcentaje / 100.0));
+
+        if (cantidadASimular <= 0) {
+            cantidadASimular = 1;
+        }
+
+        // Mezclar y tomar sólo el subconjunto a simular
+        List<UserAccount> listaTrabajo = new ArrayList<>(votantesPendientes);
+        Collections.shuffle(listaTrabajo, random);
+       /* listaTrabajo = listaTrabajo.subList(0, cantidadASimular); */
+        List<UserAccount> subLista = new ArrayList<>(listaTrabajo.subList(0, cantidadASimular));
+
+        // Inicializar barra de progreso
+        progresoService.reset(cantidadASimular);
+
+        new Thread(() -> {
+            try {
+                /*for (UserAccount votante : listaTrabajo) { */
+                for (UserAccount votante : subLista) {
+
+                    Candidato elegido = candidatos.get(random.nextInt(candidatos.size()));
+
+                    Elige voto = new Elige();
+                    voto.setHashVotante(UUID.randomUUID());
+                    voto.setCandidato(elegido);
+                    eligeRepository.save(voto);
+
+                    votante.setHaVotado(true);
+                    userAccountRepository.save(votante);
+
+                    // Avanza la barra (en memoria)
+                    progresoService.aumentar();
+
+                    Thread.sleep(10); // pequeña pausa para que se vea el avance
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        return Map.of(
+                "status", "running",
+                "totalPendientes", totalPendientes,
+                "simulados", cantidadASimular,
+                "porcentaje", porcentaje
+        );
     }
 
     // ===========================================================
-    // ⭐⭐ NUEVO: CONSULTAR PROGRESO (AJAX) ⭐⭐
+    // ENDPOINT DE PROGRESO PARA LA BARRA LIVE
     // ===========================================================
     @GetMapping("/progreso-simulacion")
     @ResponseBody
-    public Map<String, Integer> progresoSimulacion() {
-        Map<String, Integer> m = new HashMap<>();
-        m.put("total", progresoService.getTotal());
-        m.put("procesados", progresoService.getProcesados());
-        return m;
+    public Map<String, Object> progresoSimulacion() {
+        return Map.of(
+                "total", progresoService.getTotal(),
+                "procesados", progresoService.getProcesados()
+        );
     }
+    // ===========================================================
+// RESTAURAR SISTEMA – BORRAR VOTOS Y REINICIAR ESTADO
+// ===========================================================
+    @PostMapping("/restaurar-sistema")
+    @ResponseBody
+    public Map<String, Object> restaurarSistema() {
 
-    // ===========================================================
-    // UTILIDADES CSV (TU CÓDIGO)
-    // ===========================================================
-    private static List<String> leerCsvLimpio(BufferedReader reader) throws Exception {
-        List<String> out = new ArrayList<>();
-        String line;
-        boolean first = true;
-        while ((line = reader.readLine()) != null) {
-            if (first) { line = removerBOM(line); first = false; }
-            if (line == null || line.trim().isEmpty()) continue;
-            out.add(line);
+        try {
+            // 1️⃣ Borrar todos los votos
+            eligeRepository.deleteAll();
+
+            // 2️⃣ Dejar a todos los votantes como "no han votado"
+            List<UserAccount> votantes = userAccountRepository.findAll();
+            for (UserAccount v : votantes) {
+                v.setHaVotado(false);
+            }
+            userAccountRepository.saveAll(votantes);
+
+            // 3️⃣ Resetear barra de progreso
+            progresoService.reset(0);
+
+            return Map.of("status", "ok", "message", "Sistema restaurado correctamente.");
+
+        } catch (Exception e) {
+            return Map.of("status", "error", "message", e.getMessage());
         }
-        return out;
     }
 
-    private static String removerBOM(String s) {
-        if (s != null && !s.isEmpty() && s.charAt(0) == '\uFEFF') return s.substring(1);
-        return s;
-    }
-
-    private static String limpiarTexto(String s) {
-        if (s == null) return "";
-        return s.trim().replaceAll("[^0-9A-Za-zÁÉÍÓÚáéíóúÑñ@._\\- ]", "");
-    }
-
-    private static String[] splitCsv(String line) {
-        String[] raw = line.split("[,;\\t]", -1);
-        for (int i = 0; i < raw.length; i++) raw[i] = limpiarTexto(raw[i]);
-        return raw;
-    }
-
-    private static boolean eq(String a, String b) {
-        return a != null && a.trim().equalsIgnoreCase(b.trim());
-    }
 }

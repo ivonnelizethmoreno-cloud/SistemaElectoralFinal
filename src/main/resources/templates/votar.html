@@ -60,12 +60,12 @@
         🗳️ Tarjetón de Votación - Senado
     </h2>
 
-    <!-- SUBTÍTULO: TIPO DE TARJETÓN -->
+    <!-- SUBTÍTULO -->
     <h4 class="text-center text-success fw-bold mb-4"
         th:text="'Tarjetón ' + (${tipoTarjeton} == 'ORDINARIO' ? 'Ordinario' : 'Indígena')">
     </h4>
 
-    <!-- BOTÓN CAMBIAR TARJETÓN (solo votante indígena) -->
+    <!-- CAMBIAR TARJETÓN -->
     <div th:if="${circunscripcionVotante == 'INDIGENA'}"
          class="text-center mb-4">
 
@@ -88,14 +88,13 @@
 
         <!-- HIDDEN PARA EL CONTROLADOR -->
         <input type="hidden" id="partidoId" name="partidoId">
-        <input type="hidden" id="candidatoId" name="candidatoId">
+        <input type="hidden" id="candidatoIdHidden" name="candidatoIdHidden">
 
         <!-- TARJETÓN -->
         <div th:each="entry : ${partidos}" class="tarjeta-partido">
             <div th:with="partido=${entry.key}, relaciones=${entry.value}"
                  th:attr="data-partido-id=${partido.partidoId}">
 
-                <!-- NOMBRE PARTIDO -->
                 <h5 class="text-center text-primary fw-bold" th:text="${partido.nombre}"></h5>
 
                 <p class="text-center text-muted">
@@ -124,9 +123,6 @@
 
                     </div>
 
-                    <p class="text-center mt-2 text-muted small">
-                        Lista abierta – marque un número de candidato
-                    </p>
                 </div>
 
                 <!-- LISTA CERRADA -->
@@ -144,12 +140,25 @@
                         <span th:text="${partido.nombre}"></span>
                     </label>
 
-                    <p class="mt-2 text-muted small">
-                        Lista cerrada – marque solo el partido
-                    </p>
                 </div>
 
             </div>
+        </div>
+
+        <!-- OPCIÓN VOTO EN BLANCO -->
+        <div class="card p-3 mt-4 text-center border border-dark">
+            <h5 class="fw-bold text-dark">🟨 Voto en Blanco</h5>
+
+            <input type="radio"
+                   name="candidatoId"
+                   id="votoBlanco"
+                   value="BLANCO"
+                   class="btn-check voto-radio">
+
+            <label for="votoBlanco"
+                   class="btn btn-outline-dark btn-lg">
+                Seleccionar Voto en Blanco
+            </label>
         </div>
 
         <button type="submit" class="btn btn-primary boton-voto">Enviar voto</button>
@@ -168,8 +177,14 @@
             return false;
         }
 
-        const label = document.querySelector("label[for='" + seleccionado.id + "']");
-        const opcion = label ? label.textContent.trim() : seleccionado.value;
+        let opcion;
+
+        if (seleccionado.value === "BLANCO") {
+            opcion = "VOTO EN BLANCO";
+        } else {
+            const label = document.querySelector("label[for='" + seleccionado.id + "']");
+            opcion = label ? label.textContent.trim() : seleccionado.value;
+        }
 
         const confirmar = confirm("¿Confirmas tu voto por: " + opcion + "?");
 
@@ -202,7 +217,7 @@
     actualizarContador();
 </script>
 
-<!-- MAPEO DE SELECCIÓN PARA EL CONTROLADOR -->
+<!-- MAPEO DE SELECCIÓN -->
 <script>
     const radios = document.querySelectorAll(".voto-radio");
 
@@ -212,19 +227,28 @@
             radios.forEach(x => { if (x !== r) x.checked = false; });
 
             const hiddenPartido = document.getElementById("partidoId");
-            const hiddenCandidato = document.getElementById("candidatoId");
+            const hiddenCandidato = document.getElementById("candidatoIdHidden");
 
+            // 🟨 VOTO EN BLANCO
+            if (r.value === "BLANCO") {
+                hiddenCandidato.value = "BLANCO";
+                hiddenPartido.value = "";
+                return;
+            }
+
+            // 🎯 LISTA ABIERTA
             if (r.name === "candidatoId") {
                 hiddenCandidato.value = r.value;
 
                 const card = r.closest(".tarjeta-partido");
-                const idPartido = card.getAttribute("data-partido-id");
+                const idPartido = card ? card.getAttribute("data-partido-id") : "";
                 hiddenPartido.value = idPartido;
             }
 
+            // 🎯 LISTA CERRADA
             if (r.name === "partidoIdCerrado") {
                 hiddenPartido.value = r.value;
-                hiddenCandidato.value = -1;
+                hiddenCandidato.value = "-1";
             }
         });
     });

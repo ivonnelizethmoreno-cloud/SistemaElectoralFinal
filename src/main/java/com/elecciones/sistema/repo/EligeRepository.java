@@ -11,27 +11,38 @@ import java.util.UUID;
 @Repository
 public interface EligeRepository extends JpaRepository<Elige, Long> {
 
-    // 🔹 Verifica si un votante (hash) ya emitió su voto
     boolean existsByHashVotante(UUID hashVotante);
 
-    // 🔹 Conteo total de votos emitidos por candidato
+    // 🔥 VOTOS POR CANDIDATO – seguro
     @Query("""
-        SELECT e.candidato.cedula, e.candidato.nombre, COUNT(e)
-        FROM Elige e
-        GROUP BY e.candidato.cedula, e.candidato.nombre
-        ORDER BY COUNT(e) DESC
+        SELECT c.cedula, c.nombre, COUNT(e.idElige)
+        FROM Candidato c
+        LEFT JOIN Elige e ON e.candidato = c
+        GROUP BY c.cedula, c.nombre
+        ORDER BY COUNT(e.idElige) DESC
     """)
     List<Object[]> contarVotosPorCandidato();
-    // 🔹 Conteo total de votos emitidos por partido (usando solo Elige)
+
+    // 🔥 VOTOS POR PARTIDO – seguro
     @Query("""
-    SELECT p.nombre, COUNT(e.idElige)
-    FROM Elige e
-    JOIN e.candidato c
-    JOIN c.pertenece pe
-    JOIN pe.partido p
-    GROUP BY p.nombre
-    ORDER BY COUNT(e.idElige) DESC
-""")
+        SELECT p.nombre, COUNT(e.idElige)
+        FROM Partido p
+        LEFT JOIN p.pertenece pe
+        LEFT JOIN pe.candidato c
+        LEFT JOIN Elige e ON e.candidato = c
+        GROUP BY p.nombre
+        ORDER BY COUNT(e.idElige) DESC
+    """)
     List<Object[]> contarVotosPorPartido();
 
+    // 🟨 NUEVO: VOTOS SOLO PARA CANDIDATOS INDÍGENAS
+    @Query("""
+        SELECT c.nombre, COUNT(e.idElige)
+        FROM Candidato c
+        LEFT JOIN Elige e ON e.candidato = c
+        WHERE UPPER(c.circunscripcion) = 'INDIGENA'
+        GROUP BY c.nombre
+        ORDER BY COUNT(e.idElige) DESC
+    """)
+    List<Object[]> contarVotosIndigenasPorCandidato();
 }

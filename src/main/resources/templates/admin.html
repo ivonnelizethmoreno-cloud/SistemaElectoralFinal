@@ -8,20 +8,17 @@
     <style>
         body { background-color: #f4f6f9; font-family: "Segoe UI", sans-serif; }
         .panel {
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-            margin-top: 50px;
+            background: #fff; padding: 30px; border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1); margin-top: 50px;
         }
         h2, h3 { color: #0d47a1; font-weight: 700; }
-        .btn-primary, .btn-success, .btn-warning, .btn-secondary {
-            border: none;
-            font-weight: 600;
-            border-radius: 8px;
+        .btn-primary, .btn-success, .btn-warning,
+        .btn-secondary, .btn-dark, .btn-danger, .btn-info {
+            border: none; font-weight: 600; border-radius: 8px;
         }
         table th { background-color: #e3f2fd; }
         .alert { font-weight: 600; }
+        .range-value { font-weight: bold; color: #0d47a1; }
     </style>
 </head>
 <body>
@@ -34,17 +31,99 @@
 
         <div th:if="${mensaje}" class="alert alert-info text-center" th:text="${mensaje}"></div>
 
+        <!-- ========================================================= -->
+        <!-- 📥 CARGA DE ARCHIVOS CSV -->
+        <!-- ========================================================= -->
 
-        <!-- ================================ -->
-        <!-- TUS SECCIONES ORIGINALES -->
-        <!-- ================================ -->
+        <h3 class="mt-4 mb-3">📥 Cargar Información CSV</h3>
 
-        <!-- (TODO TU HTML ORIGINAL AQUÍ SIN CAMBIOS) -->
-        <!-- (NO OMITO NADA, ESTÁ EXACTAMENTE IGUAL) -->
+        <div class="row">
 
-        <!-- ================================================= -->
-        <!-- BOTÓN YA EXISTENTE DE RESULTADOS -->
-        <!-- ================================================= -->
+            <!-- PARTIDOS -->
+            <div class="col-md-3 mb-3">
+                <form th:action="@{/admin/cargar-partidos}" method="post" enctype="multipart/form-data">
+                    <div class="card p-3">
+                        <h6 class="text-center">🏛️ Partidos</h6>
+                        <input type="file" name="file" class="form-control mb-2" required>
+                        <button class="btn btn-warning w-100">Cargar Partidos</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- CANDIDATOS -->
+            <div class="col-md-3 mb-3">
+                <form th:action="@{/admin/cargar-candidatos}" method="post" enctype="multipart/form-data">
+                    <div class="card p-3">
+                        <h6 class="text-center">🧑‍💼 Candidatos</h6>
+                        <input type="file" name="file" class="form-control mb-2" required>
+                        <button class="btn btn-primary w-100">Cargar Candidatos</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- VOTANTES -->
+            <div class="col-md-3 mb-3">
+                <form th:action="@{/admin/cargar-votantes}" method="post" enctype="multipart/form-data">
+                    <div class="card p-3">
+                        <h6 class="text-center">🗳️ Votantes</h6>
+                        <input type="file" name="file" class="form-control mb-2" required>
+                        <button class="btn btn-success w-100">Cargar Votantes</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ORDEN DE LISTAS -->
+            <div class="col-md-3 mb-3">
+                <form th:action="@{/admin/cargar-listas}" method="post" enctype="multipart/form-data">
+                    <div class="card p-3">
+                        <h6 class="text-center">📋 Orden de Lista</h6>
+                        <input type="file" name="file" class="form-control mb-2" required>
+                        <button class="btn btn-secondary w-100">Cargar Orden</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <hr class="my-4">
+
+        <!-- ========================================================= -->
+        <!-- 🧠 SIMULACIÓN LIVE -->
+        <!-- ========================================================= -->
+
+        <h3 class="mb-3">🧠 Simulación Masiva LIVE</h3>
+
+        <div class="card p-4">
+
+            <label class="form-label fw-bold">Porcentaje a simular:</label>
+
+            <input id="sliderPct" type="range" min="1" max="100" value="10" class="form-range"
+                   oninput="document.getElementById('valorPct').textContent=this.value">
+
+            <p class="mt-2 text-center">
+                <span class="range-value" id="valorPct">10</span>% de votantes sin votar
+            </p>
+
+            <div class="text-center mt-3">
+                <button onclick="setPct(5)" class="btn btn-outline-primary btn-sm mx-1">5%</button>
+                <button onclick="setPct(10)" class="btn btn-outline-primary btn-sm mx-1">10%</button>
+                <button onclick="setPct(20)" class="btn btn-outline-primary btn-sm mx-1">20%</button>
+                <button onclick="setPct(100)" class="btn btn-outline-danger btn-sm mx-1">100%</button>
+            </div>
+
+            <div class="text-center mt-4">
+                <button class="btn btn-dark btn-lg px-5" onclick="iniciarSimulacion()">
+                    ▶ Iniciar Simulación
+                </button>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <!-- ========================================================= -->
+        <!-- 🔒 CERRAR JORNADA / VER RESULTADOS -->
+        <!-- ========================================================= -->
 
         <div class="text-center mt-4">
             <a th:href="@{/admin/resultados}" class="btn btn-success btn-lg px-5">
@@ -52,21 +131,29 @@
             </a>
         </div>
 
-        <!-- ================================================= -->
-        <!-- SIMULACIÓN DE VOTACIÓN LIVE (NUEVO, NO INTRUSIVO) -->
-        <!-- ================================================= -->
-
-        <div class="text-center mt-4">
-            <button class="btn btn-dark btn-lg px-5" onclick="iniciarSimulacion()">
-                🧠 Simulación Masiva LIVE
-            </button>
-        </div>
+        <!-- ========================================================= -->
+        <!-- 📊 REPARTO DEL SENADO -->
+        <!-- ========================================================= -->
 
         <div class="text-center mt-4">
             <a th:href="@{/admin/reparto-senado}" class="btn btn-info btn-lg px-5">
                 📊 Reparto de Curules del Senado
             </a>
         </div>
+
+        <!-- ========================================================= -->
+        <!-- ♻ RESTAURAR SISTEMA -->
+        <!-- ========================================================= -->
+
+        <div class="text-center mt-4">
+            <button class="btn btn-danger btn-lg px-5" onclick="abrirRestaurar()">
+                ♻ Restaurar Sistema
+            </button>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- CERRAR SESIÓN -->
+        <!-- ========================================================= -->
 
         <div class="text-center mt-4">
             <a th:href="@{/logout}" class="btn btn-danger">Cerrar Sesión</a>
@@ -76,10 +163,28 @@
 </div>
 
 
-<!-- ======================================================== -->
-<!-- MODAL DE PROGRESO (NUEVO) -->
-<!-- ======================================================== -->
+<!-- ========================================================= -->
+<!-- MODAL RESTAURAR -->
+<!-- ========================================================= -->
+<div class="modal fade" id="modalRestaurar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4">
+            <h4 class="text-center text-danger fw-bold mb-3">⚠ Confirmar Restauración</h4>
 
+            <p class="text-center">Esta acción eliminará <b>todos los votos</b> y permitirá que todos los votantes vuelvan a votar.</p>
+
+            <div class="text-center mt-3">
+                <button class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-danger" onclick="restaurarSistema()">Sí, restaurar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================================================= -->
+<!-- MODAL SIMULACIÓN -->
+<!-- ========================================================= -->
 <div class="modal fade" id="modalSimulacion" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-4">
@@ -100,27 +205,35 @@
 </div>
 
 
-<!-- ======================================================== -->
-<!-- SCRIPT PARA SIMULACIÓN LIVE -->
-<!-- ======================================================== -->
+
+<!-- ========================================================= -->
+<!-- SCRIPTS -->
+<!-- ========================================================= -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+
+    function setPct(v) {
+        document.getElementById("sliderPct").value = v;
+        document.getElementById("valorPct").textContent = v;
+    }
+
     function iniciarSimulacion() {
+
+        const pct = document.getElementById("sliderPct").value;
 
         const modal = new bootstrap.Modal(document.getElementById('modalSimulacion'));
         modal.show();
 
-        // iniciar proceso en backend
-        fetch('/admin/simular-votacion-live');
+        fetch('/admin/simular-votacion-live?p=' + pct);
 
-        // revisión periódica
         const intervalo = setInterval(() => {
             fetch('/admin/progreso-simulacion')
                 .then(resp => resp.json())
                 .then(data => {
 
-                    let pct = data.total === 0 ? 0 : Math.round((data.procesados / data.total) * 100);
+                    let pct = data.total === 0 ? 0
+                        : Math.round((data.procesados / data.total) * 100);
 
                     const barra = document.getElementById('barraProgreso');
                     barra.style.width = pct + '%';
@@ -133,6 +246,16 @@
                 });
         }, 300);
     }
+
+    function abrirRestaurar() {
+        new bootstrap.Modal(document.getElementById('modalRestaurar')).show();
+    }
+
+    function restaurarSistema() {
+        fetch('/admin/restaurar-sistema', { method: 'POST' })
+            .then(() => location.reload());
+    }
+
 </script>
 
 </body>

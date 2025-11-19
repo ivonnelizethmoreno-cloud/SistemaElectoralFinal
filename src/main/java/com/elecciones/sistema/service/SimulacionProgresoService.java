@@ -18,7 +18,17 @@ public class SimulacionProgresoService {
         this.procesados = 0;
     }
 
-    public void aumentar() {
+    /*public void aumentar() {
         this.procesados++;
+    }*/
+    public void aumentar() {
+        if (total == 0) return;
+
+        int limite = (int) Math.round(total);
+
+        if (procesados < limite) {
+            this.procesados++;
+        }
     }
+
 }
