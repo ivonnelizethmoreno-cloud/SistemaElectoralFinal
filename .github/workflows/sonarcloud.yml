@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # necesario para que Sonar vea el historial de commits
+          fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -40,7 +40,3 @@ jobs:
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.branch.name=main \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-
-
-
-
