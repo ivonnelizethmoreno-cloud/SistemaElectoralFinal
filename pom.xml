@@ -138,9 +138,9 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-              <!-- =================== -->
-        <!-- OTROS PLIGINS------ -->
-        <!-- =================== -->
+        <!-- ============= -->
+        <!-- OTROS PLIGINS -->
+        <!-- ============= -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
