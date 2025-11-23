@@ -130,7 +130,15 @@
             <version>1.10.0</version>
             <scope>test</scope>
         </dependency>
-     
+
+        <!-- JUnit Platform Suite (REQUIRED for RunCucumberTest) -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>1.10.0</version>
+            <scope>test</scope>
+        </dependency>
+
 
     </dependencies>
 
