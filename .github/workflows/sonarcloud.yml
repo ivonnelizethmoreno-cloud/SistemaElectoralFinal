@@ -26,7 +26,7 @@ jobs:
           cache: 'maven'
 
       - name: Run Tests and Generate JaCoCo Report
-        run: mvn -B clean test jacoco:report
+        run: mvn -B clean test jacoco:report -DskipSonar
 
       - name: SonarCloud Scan
         env:
