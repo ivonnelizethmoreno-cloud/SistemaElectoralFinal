@@ -186,7 +186,7 @@ class VotoControllerTest {
         String vista = controller.emitirVoto(1L, null, redirect, authOrdinario);
 
         assertThat(vista).isEqualTo("redirect:/votante/gracias");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", "⚠️ Ya votaste.");
+        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", " Ya votaste.");
         verifyNoInteractions(candidatoRepository);
         verify(userAccountRepository, never()).save(usuarioOrdinario);
     }
