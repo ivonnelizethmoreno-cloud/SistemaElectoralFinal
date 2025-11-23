@@ -2,7 +2,7 @@ package com.elecciones.sistema.web;
 
 import com.elecciones.sistema.model.UserAccount;
 import com.elecciones.sistema.repo.UserAccountRepository;
-import com.elecciones.sistema.security.AuthenticationController;
+import com.elecciones.sistema.security.AuthController;
 import com.elecciones.sistema.security.dto.LoginRequest;
 import com.elecciones.sistema.security.dto.LoginResponse;
 
@@ -28,13 +28,13 @@ import static org.mockito.Mockito.*;
  *  - Registro de intentos (mock básico)
  */
 @ExtendWith(MockitoExtension.class)
-class AuthenticationControllerTest {
+class AuthControllerTest {
 
     @Mock
     private UserAccountRepository userAccountRepository;
 
     @InjectMocks
-    private AuthenticationController authenticationController;
+    private AuthController AuthController;
 
     private UserAccount mockVoter;
     private UserAccount mockAdmin;
@@ -64,7 +64,7 @@ class AuthenticationControllerTest {
                 .thenReturn(mockVoter);
 
         ResponseEntity<LoginResponse> response =
-                authenticationController.login(request);
+                AuthController.login(request);
 
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
@@ -86,7 +86,7 @@ class AuthenticationControllerTest {
                 .thenReturn(mockAdmin);
 
         ResponseEntity<LoginResponse> response =
-                authenticationController.login(request);
+                AuthController.login(request);
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals("ADMIN", response.getBody().getRol());
@@ -104,7 +104,7 @@ class AuthenticationControllerTest {
                 .thenReturn(null);
 
         ResponseEntity<LoginResponse> response =
-                authenticationController.login(request);
+                AuthController.login(request);
 
         assertEquals(401, response.getStatusCode().value());
         assertEquals("Usuario no habilitado para votar",
@@ -123,7 +123,7 @@ class AuthenticationControllerTest {
                 .thenReturn(mockVoter);
 
         ResponseEntity<LoginResponse> response =
-                authenticationController.login(request);
+                AuthController.login(request);
 
         assertEquals(401, response.getStatusCode().value());
         assertEquals("Credenciales incorrectas",
@@ -142,7 +142,7 @@ class AuthenticationControllerTest {
         LoginRequest request = new LoginRequest("votante123", "clave123");
 
         ResponseEntity<LoginResponse> response =
-                authenticationController.login(request);
+                AuthController.login(request);
 
         assertEquals("VOTANTE", response.getBody().getRol());
     }
@@ -156,7 +156,7 @@ class AuthenticationControllerTest {
         LoginRequest request = new LoginRequest("admin001", "adminpass");
 
         ResponseEntity<LoginResponse> response =
-                authenticationController.login(request);
+                AuthController.login(request);
 
         assertEquals("ADMIN", response.getBody().getRol());
     }
@@ -172,7 +172,7 @@ class AuthenticationControllerTest {
         when(userAccountRepository.findByUsername("noExiste"))
                 .thenReturn(null);
 
-        authenticationController.login(request);
+        AuthController.login(request);
 
         verify(userAccountRepository, times(1))
                 .findByUsername("noExiste");
@@ -189,7 +189,7 @@ class AuthenticationControllerTest {
         when(userAccountRepository.findByUsername("votante123"))
                 .thenReturn(mockVoter);
 
-        authenticationController.login(request);
+        AuthController.login(request);
 
         verify(userAccountRepository, times(1))
                 .findByUsername("votante123");
