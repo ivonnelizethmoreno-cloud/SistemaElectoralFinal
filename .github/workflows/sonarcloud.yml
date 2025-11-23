@@ -38,5 +38,5 @@ jobs:
             -Dsonar.projectKey=ivonnelizethmoreno-cloud_SistemaElectoralFinal \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.branch.name=main \
+            -Dsonar.branch.name=master \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
