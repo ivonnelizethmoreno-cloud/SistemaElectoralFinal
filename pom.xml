@@ -24,9 +24,9 @@
         <junit.jupiter.version>5.10.0</junit.jupiter.version>
     </properties>
 
-    <!-- -------------------------------------------- -->
+    <!-- ===================== -->
     <!-- CUCUMBER BOM (IMPORT) -->
-    <!-- -------------------------------------------- -->
+    <!-- ==================== -->
     <dependencyManagement>
         <dependencies>
             <dependency>
