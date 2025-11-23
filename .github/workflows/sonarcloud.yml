@@ -1,33 +1,60 @@
-name: SonarCloud - Java Tests Only
+name: CI - Tests + Cucumber + SonarCloud
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "master" ]
   pull_request:
-    branches:
-      - master
+    branches: [ "master" ]
 
 jobs:
-  sonarcloud:
+  build-test-sonar:
     runs-on: ubuntu-latest
 
     steps:
+
+      # 1. Código fuente
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Java
+      # 2. Java
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
 
-      - name: Run Tests and Generate JaCoCo Report
-        run: mvn -B clean test jacoco:report -DskipSonar
+      # 3. Compilar sin ejecutar pruebas todavía
+      - name: Build Project
+        run: mvn -B clean package -DskipTests
 
+      # 4. Ejecutar pruebas unitarias + Jacoco
+      - name: Run Unit Tests + Jacoco
+        run: mvn -B test jacoco:report
+
+      # 5. Ejecutar Cucumber
+      - name: Run Cucumber Tests
+        run: |
+          mvn -B -ntp test \
+          -Dtest=com.grupo.RunCucumberTest \
+          -Dcucumber.features=src/test/resources/features \
+          -Dcucumber.execution.strict=false \
+          -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
+
+      # 6. Publicar reportes Cucumber
+      - name:  Publicar reporte Cucumber
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: |
+            target/**/*.html
+            target/**/*.json
+          if-no-files-found: warn
+
+      # 7. SonarCloud Scan
       - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
