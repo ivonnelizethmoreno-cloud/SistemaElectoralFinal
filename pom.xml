@@ -39,9 +39,9 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- -------------------------------------------- -->
+    <!-- ============ -->
     <!-- DEPENDENCIAS -->
-    <!-- -------------------------------------------- -->
+    <!-- ============ -->
     <dependencies>
 
         <!-- 🔥 SPRING BOOT STARTERS (ANTES FALTABAN TODOS) -->
