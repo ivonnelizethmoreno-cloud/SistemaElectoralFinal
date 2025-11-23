@@ -38,7 +38,7 @@
 
     <dependencies>
 
-        <!-- --- SPRING BOOT (NECESARIO PARA TU PROYECTO) --- -->
+        <!--  SPRING BOOT (NECESARIO PARA TU PROYECTO)  -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -75,7 +75,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- --- TESTING --- -->
+        <!--  TESTING  -->
 
         <!-- JUnit 5 -->
         <dependency>
