@@ -35,7 +35,7 @@ jobs:
         run: |
           mvn -B verify sonar:sonar \
             -Dsonar.organization=ivonnelizethmoreno-cloud \
-            -Dsonar.projectKey=SistemaElectoralFinal \
+            -Dsonar.projectKey=ivonnelizethmoreno-cloud_SistemaElectoralFinal
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.branch.name=main \
