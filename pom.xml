@@ -17,6 +17,10 @@
         <spring-boot.version>3.3.4</spring-boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- SonarCloud -->
+        <sonar.organization>ivonnelizethmoreno-cloud</sonar.organization>
+        <sonar.projectKey>com.elecciones:sistema-electoral</sonar.projectKey>
+
     </properties>
 
     <!-- ======================================== -->
@@ -160,6 +164,14 @@
                     </execution>
                 </executions>
             </plugin>
+
+        <!-- Plugin SonarCloud -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>4.0.0.4121</version>
+            </plugin>
+
 
     </plugins>
 </build>
