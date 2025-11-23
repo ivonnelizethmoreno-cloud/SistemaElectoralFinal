@@ -9,15 +9,21 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
+    <!-- Base Spring Boot -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.2</version>
+        <relativePath/>
+    </parent>
+
     <properties>
         <java.version>17</java.version>
-        <maven.compiler.release>17</maven.compiler.release>
-
         <cucumber.version>7.18.1</cucumber.version>
         <junit.version>5.10.2</junit.version>
     </properties>
 
-    <!-- BOM para Cucumber -->
+    <!-- BOM de Cucumber -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -32,21 +38,46 @@
 
     <dependencies>
 
-        <!-- === PRODUCCIÓN === -->
+        <!-- --- SPRING BOOT (NECESARIO PARA TU PROYECTO) --- -->
+
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.34</version>
-            <scope>provided</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- PDF -->
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
             <version>5.5.13.3</version>
         </dependency>
 
-        <!-- === JUNIT 5 === -->
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- --- TESTING --- -->
+
+        <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -54,15 +85,15 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- === ENGINE NECESARIO PARA RunCucumberTest === -->
+        <!-- Engine del Suite API -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite</artifactId>
-            <version>1.10.0</version>
+            <version>1.10.2</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- === CUCUMBER === -->
+        <!-- Cucumber -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
@@ -75,7 +106,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- === MOCKITO === -->
+        <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -95,23 +126,7 @@
     <build>
         <plugins>
 
-            <!-- Lombok Annotation Processor -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>1.18.34</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-
-            <!-- JUNIT + CUCUMBER RUNNER -->
+            <!-- JUnit + Cucumber -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -121,7 +136,7 @@
                 </configuration>
             </plugin>
 
-            <!-- JACOCO -->
+            <!-- Jacoco cobertura -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
