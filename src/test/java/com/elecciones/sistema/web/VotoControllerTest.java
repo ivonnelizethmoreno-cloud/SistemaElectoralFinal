@@ -247,8 +247,9 @@ class VotoControllerTest {
 
         assertThat(vista).isEqualTo("redirect:/votante/gracias");
 
-        assertThat(redirect.getFlashAttributes())
+        assertThat((java.util.Map<String, Object>) redirect.getFlashAttributes())
                 .containsEntry("mensaje", "⚠️ Ya votaste.");
+
 
         verifyNoInteractions(candidatoRepository);
         verify(userAccountRepository, never()).save(usuarioOrdinario);
