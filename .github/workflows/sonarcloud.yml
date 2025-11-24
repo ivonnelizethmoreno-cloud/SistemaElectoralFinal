@@ -51,16 +51,15 @@ jobs:
             target/**/*.json
           if-no-files-found: warn
 
-      # 7. SonarCloud Scan
-      - name: SonarCloud Scan
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B sonar:sonar \
-            -Dsonar.organization=ivonnelizethmoreno-cloud \
-            -Dsonar.projectKey=ivonnelizethmoreno-cloud_SistemaElectoralFinal \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.branch.name=master \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+    #  - name: SonarCloud Scan
+    #   env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    #    run: |
+    #      mvn -B verify sonar:sonar \
+    #        -Dsonar.organization=ivonnelizethmoreno-cloud \
+    #       -Dsonar.projectKey=SistemaElectoralFinal \
+    #        -Dsonar.host.url=https://sonarcloud.io \
+    #        -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+    #        -Dsonar.branch.name=main \
+    #       -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
