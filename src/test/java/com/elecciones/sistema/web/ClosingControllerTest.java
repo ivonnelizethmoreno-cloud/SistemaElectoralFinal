@@ -50,7 +50,8 @@ class ClosingControllerTest {
         assertThat(vista).isEqualTo("resultados");
         assertThat(model.getAttribute("mensaje"))
                 .isEqualTo("Aún no existen votos registrados.");
-        assertThat(model.getAttribute("totalVotosEmitidos")).isEqualTo(0L);
+        assertThat(model.getAttribute("totalVotosEmitidos")).isEqualTo(0);
+
         assertThat(model.getAttribute("resultados"))
                 .isEqualTo(Collections.emptyList());
     }
