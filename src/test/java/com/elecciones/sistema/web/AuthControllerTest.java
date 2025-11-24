@@ -2,9 +2,6 @@ package com.elecciones.sistema.web;
 
 import com.elecciones.sistema.model.UserAccount;
 import com.elecciones.sistema.repo.UserAccountRepository;
-import com.elecciones.sistema.security.AuthController;
-import com.elecciones.sistema.security.dto.LoginRequest;
-import com.elecciones.sistema.security.dto.LoginResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,185 +11,187 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
  * HU 1: Autenticación
- * Pruebas unitarias para validar:
- *  - Autenticación de votantes y administradores
- *  - Manejo de errores
- *  - Validación de registro en BD
- *  - Registro de intentos (mock básico)
+ * Pruebas unitarias para:
+ *  - Vista de login (AuthController)
+ *  - Flujo de autenticación real (HomeController)
+ *  - Redirecciones por rol
+ *  - Comportamiento según haya votado o no
  */
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
 
+    // --- Mocks ---
     @Mock
     private UserAccountRepository userAccountRepository;
 
-    @InjectMocks
-    private AuthController AuthController;
+    @Mock
+    private Authentication auth;
 
-    private UserAccount mockVoter;
-    private UserAccount mockAdmin;
+    // --- Controladores reales ---
+    @InjectMocks
+    private AuthController authController;
+
+    @InjectMocks
+    private HomeController homeController;
+
+    // --- Usuarios simulados ---
+    private UserAccount admin;
+    private UserAccount votanteNoVota;
+    private UserAccount votanteYaVoto;
 
     @BeforeEach
     void setUp() {
-        mockVoter = new UserAccount();
-        mockVoter.setUsername("votante123");
-        mockVoter.setPassword("clave123");
-        mockVoter.setRol("VOTANTE");
+        admin = new UserAccount();
+        admin.setUsername("admin01");
+        admin.setRole("ADMIN");
 
-        mockAdmin = new UserAccount();
-        mockAdmin.setUsername("admin001");
-        mockAdmin.setPassword("adminpass");
-        mockAdmin.setRol("ADMIN");
+        votanteNoVota = new UserAccount();
+        votanteNoVota.setUsername("votante01");
+        votanteNoVota.setRole("VOTANTE");
+        votanteNoVota.setHaVotado(false);
+
+        votanteYaVoto = new UserAccount();
+        votanteYaVoto.setUsername("votante02");
+        votanteYaVoto.setRole("VOTANTE");
+        votanteYaVoto.setHaVotado(true);
     }
 
-    // ========================================================
-    // 1. AUTENTICACIÓN EXITOSA DE VOTANTE
-    // ========================================================
+    // =====================================================================
+    // 1. AuthController retorna la página de login
+    // =====================================================================
     @Test
-    void debePermitirIngresoVotanteRegistrado() {
-
-        LoginRequest request = new LoginRequest("votante123", "clave123");
-
-        when(userAccountRepository.findByUsername("votante123"))
-                .thenReturn(mockVoter);
-
-        ResponseEntity<LoginResponse> response =
-                AuthController.login(request);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals("VOTANTE", response.getBody().getRol());
-
-        verify(userAccountRepository, times(1))
-                .findByUsername("votante123");
+    void debeRetornarVistaLogin() {
+        String vista = authController.loginPage();
+        assertEquals("login", vista);
     }
 
-    // ========================================================
-    // 2. AUTENTICACIÓN EXITOSA DE ADMINISTRADOR
-    // ========================================================
+    // =====================================================================
+    // 2. HomeController: Usuario no autenticado → "home"
+    // =====================================================================
     @Test
-    void debePermitirIngresoAdministrador() {
-
-        LoginRequest request = new LoginRequest("admin001", "adminpass");
-
-        when(userAccountRepository.findByUsername("admin001"))
-                .thenReturn(mockAdmin);
-
-        ResponseEntity<LoginResponse> response =
-                AuthController.login(request);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals("ADMIN", response.getBody().getRol());
+    void debeEnviarAHomeSiNoHayAuth() {
+        Model model = new ExtendedModelMap();
+        String vista = homeController.home(null, model);
+        assertEquals("home", vista);
     }
 
-    // ========================================================
-    // 3. USUARIO NO REGISTRADO NO PUEDE INGRESAR
-    // ========================================================
+    // =====================================================================
+    // 3. Usuario no encontrado en BD → error
+    // =====================================================================
     @Test
-    void debeRechazarVotanteNoRegistrado() {
+    void debeMostrarErrorSiUsuarioNoExiste() {
+        when(auth.getName()).thenReturn("fantasma");
+        when(userAccountRepository.findByUsername("fantasma")).thenReturn(null);
 
-        LoginRequest request = new LoginRequest("desconocido", "pass");
+        Model model = new ExtendedModelMap();
+        String vista = homeController.home(auth, model);
 
-        when(userAccountRepository.findByUsername("desconocido"))
-                .thenReturn(null);
-
-        ResponseEntity<LoginResponse> response =
-                AuthController.login(request);
-
-        assertEquals(401, response.getStatusCode().value());
-        assertEquals("Usuario no habilitado para votar",
-                response.getBody().getMensaje());
+        assertEquals("error", vista);
+        assertEquals("Usuario no encontrado", model.getAttribute("mensaje"));
     }
 
-    // ========================================================
-    // 4. CREDENCIALES INCORRECTAS
-    // ========================================================
+    // =====================================================================
+    // 4. ADMIN → redirige a panel admin
+    // =====================================================================
     @Test
-    void debeRechazarCredencialesIncorrectas() {
+    void adminDebeIrAlPanelAdmin() {
+        when(auth.getName()).thenReturn("admin01");
+        when(userAccountRepository.findByUsername("admin01")).thenReturn(admin);
 
-        LoginRequest request = new LoginRequest("votante123", "claveIncorrecta");
+        Model model = new ExtendedModelMap();
+        String vista = homeController.home(auth, model);
 
-        when(userAccountRepository.findByUsername("votante123"))
-                .thenReturn(mockVoter);
-
-        ResponseEntity<LoginResponse> response =
-                AuthController.login(request);
-
-        assertEquals(401, response.getStatusCode().value());
-        assertEquals("Credenciales incorrectas",
-                response.getBody().getMensaje());
+        assertEquals("admin", vista);
     }
 
-    // ========================================================
-    // 5. VALIDAR DIFERENCIACIÓN DE ROLES
-    // ========================================================
+    // =====================================================================
+    // 5. VOTANTE NO ha votado → redirige a /votar
+    // =====================================================================
     @Test
-    void debeDiferenciarRolVotante() {
+    void votanteDebeIrATarjetonSiNoHaVotado() {
+        when(auth.getName()).thenReturn("votante01");
+        when(userAccountRepository.findByUsername("votante01")).thenReturn(votanteNoVota);
 
-        when(userAccountRepository.findByUsername("votante123"))
-                .thenReturn(mockVoter);
+        Model model = new ExtendedModelMap();
+        String vista = homeController.home(auth, model);
 
-        LoginRequest request = new LoginRequest("votante123", "clave123");
-
-        ResponseEntity<LoginResponse> response =
-                AuthController.login(request);
-
-        assertEquals("VOTANTE", response.getBody().getRol());
+        assertEquals("redirect:/votar", vista);
     }
 
+    // =====================================================================
+    // 6. VOTANTE ya votó → va a /gracias
+    // =====================================================================
     @Test
-    void debeDiferenciarRolAdministrador() {
+    void votanteYaVotoDebeIrAGracias() {
+        when(auth.getName()).thenReturn("votante02");
+        when(userAccountRepository.findByUsername("votante02")).thenReturn(votanteYaVoto);
 
-        when(userAccountRepository.findByUsername("admin001"))
-                .thenReturn(mockAdmin);
+        Model model = new ExtendedModelMap();
+        String vista = homeController.home(auth, model);
 
-        LoginRequest request = new LoginRequest("admin001", "adminpass");
-
-        ResponseEntity<LoginResponse> response =
-                AuthController.login(request);
-
-        assertEquals("ADMIN", response.getBody().getRol());
+        assertEquals("redirect:/gracias", vista);
     }
 
-    // ========================================================
-    // 6. REGISTRO DE INTENTOS DE AUTENTICACIÓN (FALLIDOS)
-    // ========================================================
+    // =====================================================================
+    // 7. volver-inicio: ADMIN vuelve a admin
+    // =====================================================================
     @Test
-    void debeRegistrarIntentoFallido() {
+    void volverInicioAdmin() {
+        when(auth.getName()).thenReturn("admin01");
+        when(userAccountRepository.findByUsername("admin01")).thenReturn(admin);
 
-        LoginRequest request = new LoginRequest("noExiste", "123");
+        Model model = new ExtendedModelMap();
+        String vista = homeController.volverInicio(auth, model);
 
-        when(userAccountRepository.findByUsername("noExiste"))
-                .thenReturn(null);
-
-        AuthController.login(request);
-
-        verify(userAccountRepository, times(1))
-                .findByUsername("noExiste");
+        assertEquals("admin", vista);
     }
 
-    // ========================================================
-    // 7. REGISTRO DE INTENTO EXITOSO
-    // ========================================================
+    // =====================================================================
+    // 8. volver-inicio: votante no vota → /votar
+    // =====================================================================
     @Test
-    void debeRegistrarIntentoExitoso() {
+    void volverInicioVotanteSinVotar() {
+        when(auth.getName()).thenReturn("votante01");
+        when(userAccountRepository.findByUsername("votante01")).thenReturn(votanteNoVota);
 
-        LoginRequest request = new LoginRequest("votante123", "clave123");
+        Model model = new ExtendedModelMap();
+        String vista = homeController.volverInicio(auth, model);
 
-        when(userAccountRepository.findByUsername("votante123"))
-                .thenReturn(mockVoter);
+        assertEquals("redirect:/votar", vista);
+    }
 
-        AuthController.login(request);
+    // =====================================================================
+    // 9. volver-inicio: votante ya votó → /gracias
+    // =====================================================================
+    @Test
+    void volverInicioVotanteQueYaVoto() {
+        when(auth.getName()).thenReturn("votante02");
+        when(userAccountRepository.findByUsername("votante02")).thenReturn(votanteYaVoto);
 
-        verify(userAccountRepository, times(1))
-                .findByUsername("votante123");
+        Model model = new ExtendedModelMap();
+        String vista = homeController.volverInicio(auth, model);
+
+        assertEquals("redirect:/gracias", vista);
+    }
+
+    // =====================================================================
+    // 10. /gracias devuelve vista correcta
+    // =====================================================================
+    @Test
+    void vistaGraciasCorrecta() {
+        assertEquals("gracias", homeController.gracias());
     }
 }
+
+
 
