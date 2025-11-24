@@ -1,10 +1,8 @@
 package com.elecciones.sistema.web;
 
-import com.elecciones.sistema.model.Elige;
 import com.elecciones.sistema.repo.EligeRepository;
-import com.elecciones.sistema.web.ResultadosController;
+import com.elecciones.sistema.repo.UserAccountRepository;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -12,98 +10,82 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class ResultadosControllerTest {
+class ClosingControllerTest {
 
     @Mock
     private EligeRepository eligeRepository;
 
+    @Mock
+    private UserAccountRepository userAccountRepository;
+
     @InjectMocks
     private ResultadosController resultadosController;
 
-    private Elige voto1;
-    private Elige voto2;
-
-    @BeforeEach
-    void setUp() {
-        voto1 = Elige.builder()
-                .candidatoNombre("A1")
-                .circunscripcion("INDIGENA")
-                .build();
-
-        voto2 = Elige.builder()
-                .candidatoNombre("A2")
-                .circunscripcion("INDIGENA")
-                .build();
-    }
-
-    // ========================================================
-    // 1. RESULTADOS ANONIMIZADOS
-    // ========================================================
+    // ===========================================================
+    // Caso 1: No existen votos
+    // ===========================================================
     @Test
-    void debeMostrarResultadosAnonimizados() {
+    void mostrarResultadosSinVotos() {
+        Model model = new ExtendedModelMap();
 
-        when(eligeRepository.findAll()).thenReturn(List.of(voto1, voto2));
+        when(userAccountRepository.countByRoleIgnoreCase("VOTANTE"))
+                .thenReturn(10L);
+        when(userAccountRepository.countByRoleIgnoreCaseAndHaVotadoTrue("VOTANTE"))
+                .thenReturn(0L);
+        when(eligeRepository.count())
+                .thenReturn(0L);
 
-        Model model = mock(Model.class);
-
-        String vista = resultadosController.obtenerResultados(model);
+        String vista = resultadosController.mostrarResultados(model);
 
         assertThat(vista).isEqualTo("resultados");
-
-        verify(model).addAttribute(eq("votosPorCandidato"), any(Map.class));
+        assertThat(model.getAttribute("mensaje"))
+                .isEqualTo("Aún no existen votos registrados.");
+        assertThat(model.getAttribute("totalVotosEmitidos")).isEqualTo(0L);
+        assertThat(model.getAttribute("resultados"))
+                .isEqualTo(Collections.emptyList());
     }
 
-    // ========================================================
-    // 2. CURULES INDÍGENAS MÍNIMO 2
-    // ========================================================
+    // ===========================================================
+    // Caso 2: Existen votos y se procesan correctamente
+    // ===========================================================
     @Test
-    void debeGarantizarMinimoDosCurulesIndigenas() {
+    void mostrarResultadosConVotos() {
+        Model model = new ExtendedModelMap();
 
-        when(eligeRepository.findAll()).thenReturn(List.of(voto1, voto1, voto1));
+        when(userAccountRepository.countByRoleIgnoreCase("VOTANTE"))
+                .thenReturn(10L);
+        when(userAccountRepository.countByRoleIgnoreCaseAndHaVotadoTrue("VOTANTE"))
+                .thenReturn(5L);
+        when(eligeRepository.count())
+                .thenReturn(5L);
 
-        Model model = mock(Model.class);
+        // Resultado simulado: [cedula, nombre, votos]
+        List<Object[]> resultadosSimulados = List.of(
+                new Object[]{"123", "Juan Pérez", 3L},
+                new Object[]{"456", "Ana Díaz", 2L}
+        );
 
-        resultadosController.obtenerResultados(model);
+        when(eligeRepository.contarVotosPorCandidato())
+                .thenReturn(resultadosSimulados);
 
-        verify(model).addAttribute(eq("curulesIndigenas"), argThat(c -> (int) c >= 2));
-    }
+        String vista = resultadosController.mostrarResultados(model);
 
-    // ========================================================
-    // 3. UMBRAL CORRECTO
-    // ========================================================
-    @Test
-    void debeCalcularUmbralCorrectamente() {
-
-        when(eligeRepository.findAll()).thenReturn(List.of(voto1, voto2));
-
-        Model model = mock(Model.class);
-
-        resultadosController.obtenerResultados(model);
-
-        verify(model).addAttribute(eq("umbral"), anyInt());
-    }
-
-    // ========================================================
-    // 4. CANDIDATOS ELECTOS
-    // ========================================================
-    @Test
-    void debeMostrarCandidatosElectos() {
-
-        when(eligeRepository.findAll()).thenReturn(List.of(voto1, voto1, voto2));
-
-        Model model = mock(Model.class);
-
-        resultadosController.obtenerResultados(model);
-
-        verify(model).addAttribute(eq("candidatosElectos"), any(List.class));
+        assertThat(vista).isEqualTo("resultados");
+        assertThat(model.getAttribute("totalVotosEmitidos")).isEqualTo(5L);
+        assertThat(model.getAttribute("sumaVotosCandidatos")).isEqualTo(5L);
+        assertThat(model.getAttribute("porcentajeParticipacion"))
+                .isEqualTo(50.0); // 5 de 10 votantes
+        assertThat(model.getAttribute("resultados"))
+                .isEqualTo(resultadosSimulados);
     }
 }
