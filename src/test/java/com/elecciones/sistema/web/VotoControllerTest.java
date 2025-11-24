@@ -193,7 +193,9 @@ class VotoControllerTest {
 
 
         assertThat(vista).isEqualTo("redirect:/votante/gracias");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", " Ya votaste.");
+       /* assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", " Ya votaste.");*/
+       assertThat(redirect.getFlashAttributes().get("mensaje"))
+        .isEqualTo(" Ya votaste."); /* Se inserta esta linea y se reemplaza por la 196 */
         verifyNoInteractions(candidatoRepository);
         verify(userAccountRepository, never()).save(usuarioOrdinario);
     }
