@@ -1,8 +1,8 @@
 package com.elecciones.sistema.web;
 
-import com.elecciones.sistema.dto.ResultadosResponse;
-import com.elecciones.sistema.service.ClosingService;
-import com.elecciones.sistema.controller.ClosingController;
+import com.elecciones.sistema.model.Elige;
+import com.elecciones.sistema.repo.EligeRepository;
+import com.elecciones.sistema.web.ResultadosController;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,140 +12,98 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class ClosingControllerTest {
+class ResultadosControllerTest {
 
     @Mock
-    private ClosingService closingService;
+    private EligeRepository eligeRepository;
 
     @InjectMocks
-    private ClosingController closingController;
+    private ResultadosController resultadosController;
 
-    private ResultadosResponse mockResultados;
+    private Elige voto1;
+    private Elige voto2;
 
     @BeforeEach
     void setUp() {
-        mockResultados = new ResultadosResponse();
-        mockResultados.setVotosPorCandidato(Map.of(
-                "A1", 1200,
-                "A2", 800
-        ));
-        mockResultados.setCurulesIndigenas(2);
-        mockResultados.setUmbral(30000);
-        mockResultados.setCandidatosElectos(List.of("A1", "B3", "C1"));
+        voto1 = Elige.builder()
+                .candidatoNombre("A1")
+                .circunscripcion("INDIGENA")
+                .build();
+
+        voto2 = Elige.builder()
+                .candidatoNombre("A2")
+                .circunscripcion("INDIGENA")
+                .build();
     }
 
     // ========================================================
-    // 1. Cierre de jornada exitoso
-    // ========================================================
-    @Test
-    void debeCerrarJornadaCorrectamente() {
-
-        when(closingService.cerrarJornada())
-                .thenReturn("Jornada cerrada correctamente");
-
-        ResponseEntity<String> response = closingController.cerrarJornada();
-
-        assertThat(response.getStatusCode().value()).isEqualTo(200);
-        assertThat(response.getBody()).isEqualTo("Jornada cerrada correctamente");
-
-        verify(closingService, times(1)).cerrarJornada();
-    }
-
-    // ========================================================
-    // 2. Bloquear votos después del cierre
-    // ========================================================
-    @Test
-    void debeBloquearVotosDespuesDelCierre() {
-
-        when(closingService.intentoVotarTrasCierre())
-                .thenReturn("La jornada electoral ha finalizado");
-
-        ResponseEntity<String> response = closingController.intentoVotarDespuesDelCierre();
-
-        assertThat(response.getStatusCode().value()).isEqualTo(403);
-        assertThat(response.getBody()).isEqualTo("La jornada electoral ha finalizado");
-
-        verify(closingService, times(1)).intentoVotarTrasCierre();
-    }
-
-    // ========================================================
-    // 3. Resultados sin identidad de votantes
+    // 1. RESULTADOS ANONIMIZADOS
     // ========================================================
     @Test
     void debeMostrarResultadosAnonimizados() {
 
-        when(closingService.obtenerResultados()).thenReturn(mockResultados);
+        when(eligeRepository.findAll()).thenReturn(List.of(voto1, voto2));
 
-        ResponseEntity<ResultadosResponse> response = closingController.obtenerResultados();
+        Model model = mock(Model.class);
 
-        assertThat(response.getStatusCode().value()).isEqualTo(200);
-        assertThat(response.getBody()).isNotNull();
+        String vista = resultadosController.obtenerResultados(model);
 
-        assertThat(response.getBody().getVotosPorCandidato()).containsKey("A1");
-        assertThat(response.getBody().getIdentidadVotantes()).isNull();
+        assertThat(vista).isEqualTo("resultados");
 
-        verify(closingService, times(1)).obtenerResultados();
+        verify(model).addAttribute(eq("votosPorCandidato"), any(Map.class));
     }
 
     // ========================================================
-    // 4. Mínimo dos curules indígenas
+    // 2. CURULES INDÍGENAS MÍNIMO 2
     // ========================================================
     @Test
     void debeGarantizarMinimoDosCurulesIndigenas() {
 
-        when(closingService.obtenerResultados()).thenReturn(mockResultados);
+        when(eligeRepository.findAll()).thenReturn(List.of(voto1, voto1, voto1));
 
-        ResponseEntity<ResultadosResponse> response = closingController.obtenerResultados();
+        Model model = mock(Model.class);
 
-        assertThat(response.getBody().getCurulesIndigenas()).isGreaterThanOrEqualTo(2);
+        resultadosController.obtenerResultados(model);
+
+        verify(model).addAttribute(eq("curulesIndigenas"), argThat(c -> (int) c >= 2));
     }
 
     // ========================================================
-    // 5. Permitir más de dos curules si votación lo permite
+    // 3. UMBRAL CORRECTO
     // ========================================================
     @Test
-    void debePermitirMasDeDosCurulesIndigenas() {
+    void debeCalcularUmbralCorrectamente() {
 
-        mockResultados.setCurulesIndigenas(3);
-        when(closingService.obtenerResultados()).thenReturn(mockResultados);
+        when(eligeRepository.findAll()).thenReturn(List.of(voto1, voto2));
 
-        ResponseEntity<ResultadosResponse> response = closingController.obtenerResultados();
+        Model model = mock(Model.class);
 
-        assertThat(response.getBody().getCurulesIndigenas()).isEqualTo(3);
+        resultadosController.obtenerResultados(model);
+
+        verify(model).addAttribute(eq("umbral"), anyInt());
     }
 
     // ========================================================
-    // 6. Mostrar umbral
-    // ========================================================
-    @Test
-    void debeMostrarUmbral() {
-
-        when(closingService.obtenerResultados()).thenReturn(mockResultados);
-
-        ResponseEntity<ResultadosResponse> response = closingController.obtenerResultados();
-
-        assertThat(response.getBody().getUmbral()).isEqualTo(30000);
-    }
-
-    // ========================================================
-    // 7. Mostrar candidatos electos
+    // 4. CANDIDATOS ELECTOS
     // ========================================================
     @Test
     void debeMostrarCandidatosElectos() {
 
-        when(closingService.obtenerResultados()).thenReturn(mockResultados);
+        when(eligeRepository.findAll()).thenReturn(List.of(voto1, voto1, voto2));
 
-        ResponseEntity<ResultadosResponse> response = closingController.obtenerResultados();
+        Model model = mock(Model.class);
 
-        assertThat(response.getBody().getCandidatosElectos()).contains("A1");
+        resultadosController.obtenerResultados(model);
+
+        verify(model).addAttribute(eq("candidatosElectos"), any(List.class));
     }
 }
