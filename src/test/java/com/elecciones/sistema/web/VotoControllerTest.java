@@ -127,7 +127,10 @@ class VotoControllerTest {
         @SuppressWarnings("unchecked")
         var partidos = (java.util.Map<Partido, List<Pertenece>>) model.getAttribute("partidos");
         assertThat(partidos).containsOnlyKeys(partidoOrdinario);
-        assertThat(partidos.get(partidoOrdinario)).containsExactly(ordinario);
+        assertThat(
+            partidos.values().iterator().next()
+        ).containsExactly(ordinario);
+
     }
 
     @Test
@@ -170,6 +173,7 @@ class VotoControllerTest {
 
         String vista = controller.emitirVoto(null, 15L, redirect, authOrdinario);
 
+
         ArgumentCaptor<Elige> votoCaptor = ArgumentCaptor.forClass(Elige.class);
         verify(eligeRepository).save(votoCaptor.capture());
         assertThat(vista).isEqualTo("redirect:/votante/gracias");
@@ -183,10 +187,15 @@ class VotoControllerTest {
         when(userAccountRepository.findByUsername(usuarioOrdinario.getUsername())).thenReturn(usuarioOrdinario);
 
         RedirectAttributes redirect = new RedirectAttributesModelMap();
-        String vista = controller.emitirVoto(1L, null, redirect, authOrdinario);
+        String vista = controller.emitirVoto(999L, null, redirect, authOrdinario);
+
+
+
 
         assertThat(vista).isEqualTo("redirect:/votante/gracias");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", " Ya votaste.");
+       /* assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", " Ya votaste.");*/
+       assertThat(redirect.getFlashAttributes().get("mensaje"))
+        .isEqualTo(" Ya votaste."); /* Se inserta esta linea y se reemplaza por la 196 */
         verifyNoInteractions(candidatoRepository);
         verify(userAccountRepository, never()).save(usuarioOrdinario);
     }
