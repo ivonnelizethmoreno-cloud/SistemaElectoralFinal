@@ -13,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -58,7 +56,6 @@ class CertificadoControllerTest {
                 .contains("certificado_votacion.pdf"));
         assertNotNull(response.getBody());
 
-        // Verifica interacción
         verify(userAccountRepository, times(1)).findByUsername("1234567890");
     }
 
@@ -77,7 +74,6 @@ class CertificadoControllerTest {
                 .contains("certificado_votacion.pdf"));
         assertNotNull(response.getBody());
 
-        // Repo nunca debe ser llamado
         verify(userAccountRepository, never()).findByUsername(anyString());
     }
 
