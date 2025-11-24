@@ -127,7 +127,10 @@ class VotoControllerTest {
         @SuppressWarnings("unchecked")
         var partidos = (java.util.Map<Partido, List<Pertenece>>) model.getAttribute("partidos");
         assertThat(partidos).containsOnlyKeys(partidoOrdinario);
-        assertThat(partidos.get(partidoOrdinario)).containsExactly(ordinario);
+        assertThat(
+            partidos.values().iterator().next()
+        ).containsExactly(ordinario);
+
     }
 
     @Test
@@ -141,7 +144,7 @@ class VotoControllerTest {
 
         RedirectAttributes redirect = new RedirectAttributesModelMap();
 
-        String vista = controller.emitirVoto(999L, null, redirect, authOrdinario);
+        String vista = controller.emitirVoto("999", null, redirect, authOrdinario);
 
         assertThat(vista).isEqualTo("redirect:/votante/gracias");
         assertThat(usuarioOrdinario.isHaVotado()).isTrue();
