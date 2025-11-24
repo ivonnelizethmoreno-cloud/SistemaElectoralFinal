@@ -144,7 +144,7 @@ class VotoControllerTest {
 
         RedirectAttributes redirect = new RedirectAttributesModelMap();
 
-        String vista = controller.emitirVoto("999", null, redirect, authOrdinario);
+        String vista = controller.emitirVoto(999L, null, redirect, authOrdinario);
 
         assertThat(vista).isEqualTo("redirect:/votante/gracias");
         assertThat(usuarioOrdinario.isHaVotado()).isTrue();
@@ -171,7 +171,8 @@ class VotoControllerTest {
 
         RedirectAttributes redirect = new RedirectAttributesModelMap();
 
-        String vista = controller.emitirVoto("999", null, redirect, authOrdinario);
+        String vista = controller.emitirVoto(null, 15L, redirect, authOrdinario);
+
 
         ArgumentCaptor<Elige> votoCaptor = ArgumentCaptor.forClass(Elige.class);
         verify(eligeRepository).save(votoCaptor.capture());
@@ -186,7 +187,9 @@ class VotoControllerTest {
         when(userAccountRepository.findByUsername(usuarioOrdinario.getUsername())).thenReturn(usuarioOrdinario);
 
         RedirectAttributes redirect = new RedirectAttributesModelMap();
-        String vista = controller.emitirVoto("999", null, redirect, authOrdinario);
+        String vista = controller.emitirVoto(999L, null, redirect, authOrdinario);
+
+
 
 
         assertThat(vista).isEqualTo("redirect:/votante/gracias");
