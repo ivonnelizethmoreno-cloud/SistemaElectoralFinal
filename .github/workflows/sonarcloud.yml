@@ -39,15 +39,15 @@ jobs:
           mvn -B org.jacoco:jacoco-maven-plugin:0.8.11:report
 
       # 5. Ejecutar Cucumber Tests
-      #- name: Run Cucumber Tests
-       # run: mvn -B test
-    - name: Run Cucumber (JUnit 5)
-      run: |
-       mvn -B -ntp test \
-       -Dtest=com.grupo.RunCucumberTest \
-       -Dcucumber.features=src/test/resources/features \
-       -Dcucumber.execution.strict=false \
-       -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
+      - name: Run Cucumber Tests
+        run: mvn -B test
+    #- name: Run Cucumber (JUnit 5)
+     # run: |
+      # mvn -B -ntp test \
+       #-Dtest=com.grupo.RunCucumberTest \
+       #-Dcucumber.features=src/test/resources/features \
+       #-Dcucumber.execution.strict=false \
+       #-Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
 
       # 6. Publicar reportes Cucumber
       - name: Publicar reporte Cucumber
