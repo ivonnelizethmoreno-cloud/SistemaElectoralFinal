@@ -3,7 +3,7 @@ package com.elecciones.sistema.web;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.springframework.http.HttpMethod;
 import org.springframework.ui.ConcurrentModel;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -30,9 +30,8 @@ class GlobalExceptionHandlerTest {
         when(request.getRequestURI()).thenReturn("/favicon.ico");
 
         NoResourceFoundException ex =
-                new NoResourceFoundException("GET", "/favicon.ico");
+                new NoResourceFoundException(HttpMethod.GET, "/favicon.ico");
 
-        // No debe lanzar excepción ni retornar vista
         handler.handleMissingResource(ex, request);
     }
 
@@ -43,12 +42,11 @@ class GlobalExceptionHandlerTest {
     void handleMissingResource_noFavicon_noRetornaVista() throws Exception {
 
         HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getRequestURI()).thenReturn("/algo/que/no-existe.png");
+        when(request.getRequestURI()).thenReturn("/img/no-existe.png");
 
         NoResourceFoundException ex =
-                new NoResourceFoundException("GET", "/algo/que/no-existe.png");
+                new NoResourceFoundException(HttpMethod.GET, "/img/no-existe.png");
 
-        // Debe ejecutarse sin retornar vista ni lanzar errores
         handler.handleMissingResource(ex, request);
     }
 
