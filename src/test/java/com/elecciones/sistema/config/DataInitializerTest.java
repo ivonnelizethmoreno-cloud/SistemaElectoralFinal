@@ -1,4 +1,4 @@
-package com.elecciones.sistema.config;
+ package com.elecciones.sistema.config;
 
 import com.elecciones.sistema.model.*;
 import com.elecciones.sistema.repo.*;
@@ -51,7 +51,6 @@ class DataInitializerTest {
     @Test
     void noRealizaCambiosSiYaHayDatos() {
         when(candidatoRepository.count()).thenReturn(3L);
-        when(partidoRepository.count()).thenReturn(2L);
 
         initializer.run();
 
