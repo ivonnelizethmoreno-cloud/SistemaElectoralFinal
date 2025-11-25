@@ -134,7 +134,11 @@ class PanelControllerTest {
         String ret = controller.cargarPartidos(file, redirect);
         assertThat(ret).isEqualTo("redirect:/admin");
         assertThat(redirect.getFlashAttributes().get("mensaje")).asString().contains("Partidos cargados");
-        verify(partidoRepository).save(argThat(p -> p.getPartidoId()!=null && (p.getPartidoId()==10L || p.getPartidoId()==12L)));
+        verify(partidoRepository, times(2))
+        .save(argThat(p ->
+                p.getPartidoId() != null &&
+                (p.getPartidoId() == 10L || p.getPartidoId() == 12L)
+        ));
     }
 
     // -------------------------
@@ -341,7 +345,7 @@ class PanelControllerTest {
 
         // progresoService: verify reset and aumentar are called (aumentar may be called from background thread)
         doNothing().when(progresoService).reset(anyInt());
-        doNothing().when(progresoService).aumentar();
+        lenient().doNothing().when(progresoService).aumentar();
 
         Map<String, Object> res = controller.simularVotacionLive(50);
         assertThat(res.get("status")).isEqualTo("running");
@@ -374,7 +378,7 @@ class PanelControllerTest {
 
         doNothing().when(eligeRepository).deleteAll();
         when(userAccountRepository.findAll()).thenReturn(List.of(vot));
-        doNothing().when(userAccountRepository).saveAll(anyList());
+        when(userAccountRepository.saveAll(anyList())).thenReturn(Collections.emptyList());
         doNothing().when(progresoService).reset(0);
 
         Map<String, Object> res = controller.restaurarSistema();
