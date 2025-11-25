@@ -97,7 +97,9 @@ class PanelControllerTest {
         RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
         String ret = controller.cargarPartidos(file, redirect);
         assertThat(ret).isEqualTo("redirect:/admin");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", "❌ Archivo vacío.");
+        assertThat(redirect.getFlashAttributes().get("mensaje"))
+        .isEqualTo("❌ Archivo vacío.");
+
     }
 
     @Test
@@ -107,7 +109,8 @@ class PanelControllerTest {
         RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
         String ret = controller.cargarPartidos(file, redirect);
         assertThat(ret).isEqualTo("redirect:/admin");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", "❌ Encabezado inválido para Partidos.");
+        assertThat(redirect.getFlashAttributes().get("mensaje"))
+        .isEqualTo("❌ Encabezado inválido para Partidos.");
     }
 
     @Test
@@ -143,7 +146,8 @@ class PanelControllerTest {
         RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
         String r = controller.cargarCandidatos(file, redirect);
         assertThat(r).isEqualTo("redirect:/admin");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", "❌ Archivo vacío.");
+        assertThat(redirect.getFlashAttributes().get("mensaje"))
+        .isEqualTo("❌ Archivo vacío.");
     }
 
     @Test
@@ -153,7 +157,9 @@ class PanelControllerTest {
         RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
         String r = controller.cargarCandidatos(file, redirect);
         assertThat(r).isEqualTo("redirect:/admin");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", "❌ Encabezado inválido para Candidatos.");
+        assertThat(redirect.getFlashAttributes().get("mensaje"))
+        .isEqualTo("❌ Encabezado inválido para Candidatos.");
+        
     }
 
     @Test
@@ -188,7 +194,8 @@ class PanelControllerTest {
         RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
         String r = controller.cargarVotantes(file, redirect);
         assertThat(r).isEqualTo("redirect:/admin");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", "❌ Archivo vacío.");
+        assertThat(redirect.getFlashAttributes().get("mensaje"))
+        .isEqualTo("❌ Archivo vacío.");
     }
 
     @Test
@@ -198,7 +205,9 @@ class PanelControllerTest {
         RedirectAttributesModelMap redirect = new RedirectAttributesModelMap();
         String r = controller.cargarVotantes(file, redirect);
         assertThat(r).isEqualTo("redirect:/admin");
-        assertThat(redirect.getFlashAttributes()).containsEntry("mensaje", "❌ Encabezado inválido para Votantes.");
+        assertThat(redirect.getFlashAttributes().get("mensaje"))
+        .isEqualTo("❌ Encabezado inválido para Votantes.");
+
     }
 
     @Test
@@ -363,7 +372,7 @@ class PanelControllerTest {
         vot.setUsername("v1");
         vot.setHaVotado(true);
 
-        when(eligeRepository.deleteAll()).thenReturn(void.class); // deleteAll is void; this is a no-op
+        doNothing().when(eligeRepository).deleteAll();
         when(userAccountRepository.findAll()).thenReturn(List.of(vot));
         doNothing().when(userAccountRepository).saveAll(anyList());
         doNothing().when(progresoService).reset(0);
