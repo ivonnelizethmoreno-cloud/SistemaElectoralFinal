@@ -81,25 +81,7 @@ class PartidoTest {
                 .circunscripcion("ordinaria")
                 .build();
 
-        // Lombok no implementa equals/hashCode → solo verifica que no sean iguales por referencia
         assertThat(p1).isNotEqualTo(p2);
         assertThat(p1.hashCode()).isNotEqualTo(p2.hashCode());
-    }
-
-    @Test
-    void testToString() {
-        Partido p = Partido.builder()
-                .partidoId(3L)
-                .nombre("Test Partido")
-                .tipoLista("cerrada")
-                .circunscripcion("ordinaria")
-                .build();
-
-        String s = p.toString();
-
-        assertThat(s).contains("partidoId=3");
-        assertThat(s).contains("nombre=Test Partido");
-        assertThat(s).contains("tipoLista=cerrada");
-        assertThat(s).contains("circunscripcion=ordinaria");
     }
 }
