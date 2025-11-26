@@ -47,13 +47,15 @@ jobs:
 # vamos a probar corriendo cucumber junit 5 hasta que estén las
 # dependencias es nuestro pom.xml serán las proximas 7 lines
 # vamos a comentariar lines 45 & 46 y habilitar 50 a 56, ahora comentaremos las lineas 50 a54
-      - name: Run Cucumber (JUnit 5)
-        run: |
-          mvn -B -ntp test \
-            -Dtest=com.elecciones.sistema.RunCucumberTest \
+     # - name: Run Cucumber (JUnit 5)
+      #  run: |
+       #   mvn -B -ntp test \
+        #    -Dtest=com.elecciones.sistema.RunCucumberTest \
         #    -Dcucumber.features=src/test/resources/features \
        #     -Dcucumber.glue=com.elecciones.sistema.steps \
        #   -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
+      - name: Run Cucumber (JUnit 5)
+        run: mvn -B -ntp test
 
        # -Dcucumber.execution.strict=false \
 # reemplazando lneas 50 a 54 haremos la prueba con estas e lines, vamos a comentar lines 58 a 61
