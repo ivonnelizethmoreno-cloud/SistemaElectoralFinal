@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build #-test-sonar: se hacen comentarios por syntax
+  build: #-test-sonar: se hacen comentarios por syntax
     runs-on: ubuntu-latest
 
     steps:
