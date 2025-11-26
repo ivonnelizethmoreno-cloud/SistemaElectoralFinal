@@ -50,7 +50,7 @@ jobs:
       - name: Run Cucumber (JUnit 5)
         run: |
           mvn -B -ntp test \
-            -Dtest=com.grupo.RunCucumberTest \
+            -Dtest=com.elecciones.sistema.RunCucumberTest \
             -Dcucumber.features=src/test/resources/features \
             -Dcucumber.execution.strict=false \
             -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
