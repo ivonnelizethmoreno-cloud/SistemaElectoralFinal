@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build-test-sonar:
+  build #-test-sonar: se hacen comentarios por syntax
     runs-on: ubuntu-latest
 
     steps:
@@ -15,8 +15,8 @@ jobs:
       # 1. Código fuente
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+       # with:  se hacen comentarios como prueba en estas dos lines
+        #  fetch-depth: 0
 
       # 2. Java
       - name: Set up JDK 17
