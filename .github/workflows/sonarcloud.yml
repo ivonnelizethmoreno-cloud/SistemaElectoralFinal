@@ -51,9 +51,9 @@ jobs:
         run: |
           mvn -B -ntp test \
             -Dtest=com.elecciones.sistema.RunCucumberTest \
-            -Dcucumber.features=src/test/resources/features \
-            -Dcucumber.glue=com.elecciones.sistema.steps \
-         #   -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
+        #    -Dcucumber.features=src/test/resources/features \
+       #     -Dcucumber.glue=com.elecciones.sistema.steps \
+       #   -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
 
        # -Dcucumber.execution.strict=false \
 # reemplazando lneas 50 a 54 haremos la prueba con estas e lines, vamos a comentar lines 58 a 61
