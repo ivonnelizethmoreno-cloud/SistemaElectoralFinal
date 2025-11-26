@@ -24,9 +24,4 @@ import static io.cucumber.junit.platform.engine.Constants.SNIPPET_TYPE_PROPERTY_
         key = SNIPPET_TYPE_PROPERTY_NAME,
         value = "camelcase"
 )
-// 🔥 ESTA LÍNEA OBLIGA A MAVEN SUREFIRE A EJECUTAR ESTE RUNNER
-@ConfigurationParameter(
-        key = "cucumber.execution.dry-run",
-        value = "false"
-)
 public class RunCucumberTest { }
