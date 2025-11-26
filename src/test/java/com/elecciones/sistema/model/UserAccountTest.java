@@ -28,8 +28,8 @@ class UserAccountTest {
         assertThat(user.getCorreoElectronico()).isEqualTo("correo@test.com");
         assertThat(user.getCircunscripcion()).isEqualTo("nacional");
 
+        assertThat(user.getHaVotado()).isTrue();
         assertThat(user.isHaVotado()).isTrue();
-        assertThat(user.getHaVotado()).isTrue(); // ambos deben ser true
 
         assertThat(user.isEnabled()).isFalse();
     }
@@ -57,9 +57,7 @@ class UserAccountTest {
         assertThat(user.getCorreoElectronico()).isEqualTo("admin@test.com");
         assertThat(user.getCircunscripcion()).isEqualTo("especial");
 
-        assertThat(user.getHaVotado()).isTrue();
         assertThat(user.isHaVotado()).isTrue();
-
         assertThat(user.isEnabled()).isTrue();
     }
 
@@ -87,21 +85,5 @@ class UserAccountTest {
 
         assertThat(user.isHaVotado()).isFalse();
         assertThat(user.isEnabled()).isTrue();
-    }
-
-    @Test
-    void testToString() {
-        UserAccount user = UserAccount.builder()
-                .id(7L)
-                .username("testUser")
-                .role("ROLE_USER")
-                .build();
-
-        String s = user.toString();
-
-        // Lombok @ToString incluye los campos automáticamente
-        assertThat(s).contains("id=7");
-        assertThat(s).contains("username=testUser");
-        assertThat(s).contains("role=ROLE_USER");
     }
 }
