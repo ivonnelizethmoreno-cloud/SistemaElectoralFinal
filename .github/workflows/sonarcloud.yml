@@ -32,8 +32,8 @@ jobs:
 # habrá que compilar y empaquetar el proyecto cuando el 
 # pom.xml esté integro proximas 2 lines, vamos a comentariar
 # lines 30 and 31 y habilitar 35 y 36
-    - name: Build with Maven
-      run: mvn -B package -DskipTests --file pom.xml
+      - name: Build with Maven
+        run: mvn -B package -DskipTests --file pom.xml
 
       # 4. Ejecutar pruebas unitarias + Jacoco
       - name: Run Unit Tests + Jacoco
@@ -47,13 +47,13 @@ jobs:
 # vamos a probar corriendo cucumber junit 5 hasta que estén las
 # dependencias es nuestro pom.xml serán las proximas 7 lines
 # vamos a comentariar lines 45 & 46 y habilitar 50 a 56
-    - name: Run Cucumber (JUnit 5)
-      run: |
-       mvn -B -ntp test \
-       -Dtest=com.grupo.RunCucumberTest \
-       -Dcucumber.features=src/test/resources/features \
-       -Dcucumber.execution.strict=false \
-       -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
+      - name: Run Cucumber (JUnit 5)
+        run: |
+          mvn -B -ntp test \
+            -Dtest=com.grupo.RunCucumberTest \
+            -Dcucumber.features=src/test/resources/features \
+            -Dcucumber.execution.strict=false \
+            -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
 
 
       # 6. Publicar reportes Cucumber
