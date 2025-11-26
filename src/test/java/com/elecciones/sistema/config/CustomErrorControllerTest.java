@@ -32,4 +32,4 @@ class CustomErrorControllerTest {
 
         assertThat(view).isEqualTo("error");
     }
-+}
+}
