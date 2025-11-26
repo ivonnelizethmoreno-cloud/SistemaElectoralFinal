@@ -24,47 +24,47 @@ class RepartoSenadoServiceTest {
     @Test
     void testCalcularCurulesSenado_ComportamientoCompleto() {
 
-        // 🔹 TOTAL VOTOS
+        // TOTAL VOTOS
         when(eligeRepository.count()).thenReturn(1000L);
 
-        // 🔹 VOTOS POR PARTIDO (nombre, votos)
+        // (nombre, votos)
         List<Object[]> resultados = Arrays.asList(
                 new Object[]{"A", 400},
                 new Object[]{"B", 300},
                 new Object[]{"C", 200},
-                new Object[]{"D", 50}        // <— SÍ supera el umbral (30)
+                new Object[]{"D", 50}  // supera umbral (30)
         );
 
         when(eligeRepository.contarVotosPorPartido()).thenReturn(resultados);
 
-        // 🔹 Ejecutar método
         Map<String, Object> respuesta = service.calcularCurulesSenado();
 
-        // Total de votos
+        // Total votos
         assertThat(respuesta.get("totalVotos")).isEqualTo(1000L);
 
-        // Umbral = 3% de 1000 = 30
+        // Umbral = 3% = 30
         assertThat(respuesta.get("umbral")).isEqualTo(30.0);
 
-        // Cifra repartidora válida
+        // Cifra repartidora > 0
         double cifraRepartidora = (double) respuesta.get("cifraRepartidora");
-        assertThat(cifraRepartidora).isGreaterThan(0);
+        assertThat(cifraRepartidora).isGreaterThan(0.0);
 
         Map<String, Integer> curules = (Map<String, Integer>) respuesta.get("curules");
 
-        // 🔹 Todos los partidos A, B, C y D superan el umbral
+        // Todos los partidos superan el umbral
         assertThat(curules).containsKeys("A", "B", "C", "D");
 
-        // Cada partido debe tener al menos 1 curul
-        curules.forEach((k, v) ->
-                assertThat(v).withFailMessage(k + " debe tener al menos 1 curul").isGreaterThan(0)
+        // Cada partido recibe al menos un escaño (esperado por los votos configurados)
+        curules.values().forEach(v ->
+                assertThat(v).isGreaterThan(0)
         );
 
-        // Total curules = EXACTAMENTE 100
-        int totalAsignado = curules.values().stream().mapToInt(i -> i).sum();
-        assertThat(totalAsignado).isEqualTo(100);
+        // El número total de curules debe ser 100 (regla del Senado)
+        int totalAsignado = curules.values().stream().mapToInt(Integer::intValue).sum();
+        assertThat(totalAsignado)
+                .withFailMessage("La suma de curules debería ser 100, pero fue: " + totalAsignado)
+                .isEqualTo(100);
 
-        // Verificar llamadas al repositorio
         verify(eligeRepository, times(1)).count();
         verify(eligeRepository, times(1)).contarVotosPorPartido();
     }
@@ -72,10 +72,10 @@ class RepartoSenadoServiceTest {
     @Test
     void testCalcularCurulesSenado_SinPartidosValidos() {
 
-        // 🔹 TOTAL votos = 1000
+        // Total votos
         when(eligeRepository.count()).thenReturn(1000L);
 
-        // 🔹 Todos los partidos debajo del umbral
+        // Todos los votos por debajo del umbral
         List<Object[]> resultados = Arrays.asList(
                 new Object[]{"X", 10},
                 new Object[]{"Y", 20}
@@ -87,10 +87,10 @@ class RepartoSenadoServiceTest {
 
         Map<String, Integer> curules = (Map<String, Integer>) respuesta.get("curules");
 
-        // 🔹 No hay partidos válidos
+        // No debe haber partidos válidos
         assertThat(curules).isEmpty();
 
-        // 🔹 Cifra repartidora debe ser 0 cuando no hay cocientes
+        // Cifra repartidora debe ser 0 cuando no hay cocientes
         assertThat((double) respuesta.get("cifraRepartidora")).isEqualTo(0.0);
 
         verify(eligeRepository, times(1)).count();
