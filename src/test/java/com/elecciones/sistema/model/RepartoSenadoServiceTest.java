@@ -91,3 +91,4 @@ class RepartoSenadoServiceTest {
         verify(eligeRepository, times(1)).count();
         verify(eligeRepository, times(1)).contarVotosPorPartido();
     }
+}
