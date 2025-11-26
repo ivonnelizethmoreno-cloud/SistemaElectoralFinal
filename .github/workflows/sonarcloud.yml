@@ -51,9 +51,9 @@ jobs:
         run: |
           mvn -B -ntp test \
             -Dtest=com.elecciones.sistema.RunCucumberTest \
-            -Dcucumber.features=src/test/resources/features \
-            -Dcucumber.execution.strict=false \
             -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
+       # -Dcucumber.features=src/test/resources/features \
+       # -Dcucumber.execution.strict=false \
 
 
       # 6. Publicar reportes Cucumber
