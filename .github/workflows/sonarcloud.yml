@@ -54,11 +54,13 @@ jobs:
          #   -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
        # -Dcucumber.features=src/test/resources/features \
        # -Dcucumber.execution.strict=false \
-# reemplazando lneas 50 a 54 haremos la prueba con estas e lines
+# reemplazando lneas 50 a 54 haremos la prueba con estas e lines, vamos a comentar lines 58 a 61
+     # - name: Run Cucumber (JUnit 5)
+     #   run: |
+     #     mvn -B -ntp test \
+     #       -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
       - name: Run Cucumber (JUnit 5)
-        run: |
-          mvn -B -ntp test \
-            -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
+        run: mvn -B -ntp test
 
 
       # 6. Publicar reportes Cucumber
