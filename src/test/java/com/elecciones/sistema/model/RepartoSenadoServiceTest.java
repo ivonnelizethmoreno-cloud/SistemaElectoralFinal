@@ -32,7 +32,7 @@ class RepartoSenadoServiceTest {
                 new Object[]{"A", 400},
                 new Object[]{"B", 300},
                 new Object[]{"C", 200},
-                new Object[]{"D", 50}        // No pasa el umbral
+                new Object[]{"D", 50}        // <— SÍ supera el umbral (30)
         );
 
         when(eligeRepository.contarVotosPorPartido()).thenReturn(resultados);
@@ -40,39 +40,31 @@ class RepartoSenadoServiceTest {
         // 🔹 Ejecutar método
         Map<String, Object> respuesta = service.calcularCurulesSenado();
 
-        // ================
-        // VERIFICACIONES
-        // ================
-
         // Total de votos
         assertThat(respuesta.get("totalVotos")).isEqualTo(1000L);
 
         // Umbral = 3% de 1000 = 30
         assertThat(respuesta.get("umbral")).isEqualTo(30.0);
 
-        // Cifra repartidora debe ser positiva
+        // Cifra repartidora válida
         double cifraRepartidora = (double) respuesta.get("cifraRepartidora");
         assertThat(cifraRepartidora).isGreaterThan(0);
 
-        // Curules por partido
         Map<String, Integer> curules = (Map<String, Integer>) respuesta.get("curules");
 
-        // D NO DEBE aparecer (50 < 30)
-        assertThat(curules.containsKey("D")).isFalse();
+        // 🔹 Todos los partidos A, B, C y D superan el umbral
+        assertThat(curules).containsKeys("A", "B", "C", "D");
 
-        // A, B, C sí deben aparecer
-        assertThat(curules).containsKeys("A", "B", "C");
+        // Cada partido debe tener al menos 1 curul
+        curules.forEach((k, v) ->
+                assertThat(v).withFailMessage(k + " debe tener al menos 1 curul").isGreaterThan(0)
+        );
 
-        // Cada partido debe tener al menos 1 curul (por su cantidad de votos)
-        assertThat(curules.get("A")).isGreaterThan(0);
-        assertThat(curules.get("B")).isGreaterThan(0);
-        assertThat(curules.get("C")).isGreaterThan(0);
-
-        // TOTAL curules = 100
+        // Total curules = EXACTAMENTE 100
         int totalAsignado = curules.values().stream().mapToInt(i -> i).sum();
         assertThat(totalAsignado).isEqualTo(100);
 
-        // Verificar llamadas al repository
+        // Verificar llamadas al repositorio
         verify(eligeRepository, times(1)).count();
         verify(eligeRepository, times(1)).contarVotosPorPartido();
     }
@@ -95,11 +87,11 @@ class RepartoSenadoServiceTest {
 
         Map<String, Integer> curules = (Map<String, Integer>) respuesta.get("curules");
 
-        // 🔹 Ningún partido supera el umbral
+        // 🔹 No hay partidos válidos
         assertThat(curules).isEmpty();
 
-        // Cifra repartidora = último cociente disponible
-        assertThat((double) respuesta.get("cifraRepartidora")).isGreaterThan(0);
+        // 🔹 Cifra repartidora debe ser 0 cuando no hay cocientes
+        assertThat((double) respuesta.get("cifraRepartidora")).isEqualTo(0.0);
 
         verify(eligeRepository, times(1)).count();
         verify(eligeRepository, times(1)).contarVotosPorPartido();
