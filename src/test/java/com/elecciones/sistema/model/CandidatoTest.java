@@ -62,16 +62,20 @@ class CandidatoTest {
 
     @Test
     void testEqualsYhashCode() {
+        List<Pertenece> lista = new ArrayList<>();
+
         Candidato c1 = Candidato.builder()
                 .cedula(1L)
                 .nombre("A")
                 .circunscripcion("X")
+                .pertenece(lista)
                 .build();
 
         Candidato c2 = Candidato.builder()
                 .cedula(1L)
                 .nombre("A")
                 .circunscripcion("X")
+                .pertenece(lista)
                 .build();
 
         assertThat(c1).isEqualTo(c2);
@@ -84,6 +88,7 @@ class CandidatoTest {
                 .cedula(3L)
                 .nombre("Test")
                 .circunscripcion("Y")
+                .pertenece(new ArrayList<>()) // evita pertenece=null
                 .build();
 
         String s = c.toString();
