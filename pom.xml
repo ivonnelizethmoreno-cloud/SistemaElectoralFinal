@@ -4,26 +4,25 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.2</version>
+    </parent>
+
     <groupId>com.elecciones</groupId>
     <artifactId>SistemaElectoralFinal</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <!-- Base Spring Boot -->
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
-        <relativePath/>
-    </parent>
-
     <properties>
         <java.version>17</java.version>
         <cucumber.version>7.18.1</cucumber.version>
         <junit.version>5.10.2</junit.version>
+        <jacoco.version>0.8.11</jacoco.version>
     </properties>
 
-    <!-- BOM de Cucumber -->
+    <!-- Gestión del BOM de Cucumber -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -38,8 +37,7 @@
 
     <dependencies>
 
-        <!--  SPRING BOOT (NECESARIO PARA TU PROYECTO)  -->
-
+        <!-- SPRING -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -54,32 +52,8 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <scope>test</scope>
-        </dependency>
 
-         <!-- ========================= -->
-        <!--   mockito     -->
-        <!-- ========================= -->
-         <!-- Mockito Core 
-         <dependency>
-             <groupId>org.mockito</groupId>
-             <artifactId>mockito-core</artifactId>
-             <version>5.12.0</version>
-             <scope>test</scope>
-         </dependency> -->
-         
-         <!-- Mockito Inline (permite mockear clases finales y métodos estáticos) -->
-         <dependency>
-             <groupId>org.mockito</groupId>
-             <artifactId>mockito-inline</artifactId>
-             <version>5.2.0</version>
-             <scope>test</scope>
-         </dependency>
-    
-        <!-- PostgreSQL para despliegue real -->
+        <!-- BD -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -100,7 +74,9 @@
             <optional>true</optional>
         </dependency>
 
-        <!--  TESTING  -->
+        <!-- ========================= -->
+        <!--       TESTING             -->
+        <!-- ========================= -->
 
         <!-- JUnit 5 -->
         <dependency>
@@ -110,14 +86,14 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Engine del Suite API -->
+        <!-- JUnit Platform Suite (OBLIGATORIO PARA CUCUMBER) -->
         <dependency>
             <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-suite</artifactId>
+            <artifactId>junit-platform-suite-api</artifactId>
             <version>1.10.2</version>
             <scope>test</scope>
         </dependency>
-       
+
         <!-- Cucumber -->
         <dependency>
             <groupId>io.cucumber</groupId>
@@ -131,62 +107,71 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Mockito -->
+        <!-- Necesario para DI en Steps -->
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>5.12.0</version>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-picocontainer</artifactId>
             <scope>test</scope>
         </dependency>
 
-         <!-- AssertJ para pruebas con asserts más avanzados -->
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.24.2</version>
-            <scope>test</scope>
-        </dependency>
-              
+        <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.12.0</version>
+            <artifactId>mockito-inline</artifactId>
+            <version>5.2.0</version>
             <scope>test</scope>
         </dependency>
-             
-          <!-- AssertJ para pruebas con asserts más avanzados -->
+
+        <!-- AssertJ (solo una vez) -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.24.2</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Spring Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.sonarsource.scanner.maven</groupId>
-                <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.9.1.2184</version>
-            </plugin>
 
-            <!-- JUnit + Cucumber -->
+            <!-- Surefire (para ejecutar Cucumber + JUnit 5) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
+
+                    <includes>
+                        <include>**/RunCucumberTest*</include>
+                        <include>**/*Test*</include>
+                    </includes>
+
+                    <systemPropertyVariables>
+                        <cucumber.junit-platform.naming-strategy>long</cucumber.junit-platform.naming-strategy>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
-            <!-- Jacoco cobertura -->
+            <!-- JaCoCo -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.11</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -195,7 +180,7 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -207,3 +192,4 @@
     </build>
 
 </project>
+
