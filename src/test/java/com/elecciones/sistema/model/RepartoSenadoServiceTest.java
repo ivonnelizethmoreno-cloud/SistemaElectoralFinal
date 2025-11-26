@@ -42,11 +42,11 @@ class RepartoSenadoServiceTest {
         // Total votos
         assertThat(respuesta.get("totalVotos")).isEqualTo(1000L);
 
-        // Umbral = 3% = 30
-        assertThat(respuesta.get("umbral")).isEqualTo(30.0);
+        // Umbral (3%)
+        assertThat((Double) respuesta.get("umbral")).isEqualTo(30.0);
 
-        // Cifra repartidora > 0
-        double cifraRepartidora = (double) respuesta.get("cifraRepartidora");
+        // Cifra repartidora
+        Double cifraRepartidora = (Double) respuesta.get("cifraRepartidora");
         assertThat(cifraRepartidora).isGreaterThan(0.0);
 
         Map<String, Integer> curules = (Map<String, Integer>) respuesta.get("curules");
@@ -54,12 +54,12 @@ class RepartoSenadoServiceTest {
         // Todos los partidos superan el umbral
         assertThat(curules).containsKeys("A", "B", "C", "D");
 
-        // Cada partido recibe al menos un escaño (esperado por los votos configurados)
+        // Cada partido debe tener al menos UN escaño
         curules.values().forEach(v ->
                 assertThat(v).isGreaterThan(0)
         );
 
-        // El número total de curules debe ser 100 (regla del Senado)
+        // Total curules (100)
         int totalAsignado = curules.values().stream().mapToInt(Integer::intValue).sum();
         assertThat(totalAsignado)
                 .withFailMessage("La suma de curules debería ser 100, pero fue: " + totalAsignado)
@@ -75,7 +75,7 @@ class RepartoSenadoServiceTest {
         // Total votos
         when(eligeRepository.count()).thenReturn(1000L);
 
-        // Todos los votos por debajo del umbral
+        // Todos por debajo del umbral
         List<Object[]> resultados = Arrays.asList(
                 new Object[]{"X", 10},
                 new Object[]{"Y", 20}
@@ -87,11 +87,11 @@ class RepartoSenadoServiceTest {
 
         Map<String, Integer> curules = (Map<String, Integer>) respuesta.get("curules");
 
-        // No debe haber partidos válidos
+        // No partidos válidos
         assertThat(curules).isEmpty();
 
-        // Cifra repartidora debe ser 0 cuando no hay cocientes
-        assertThat((double) respuesta.get("cifraRepartidora")).isEqualTo(0.0);
+        // Cifra repartidora = 0
+        assertThat((Double) respuesta.get("cifraRepartidora")).isEqualTo(0.0);
 
         verify(eligeRepository, times(1)).count();
         verify(eligeRepository, times(1)).contarVotosPorPartido();
