@@ -16,7 +16,7 @@
         <jacoco.version>0.8.11</jacoco.version>
     </properties>
 
-     Gestión del BOM de Cucumber 
+   <!--  Gestión del BOM de Cucumber -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -57,7 +57,7 @@
             <url>https://repo.maven.apache.org/maven2</url>
         </pluginRepository>
     </pluginRepositories> 
-      Repositorios explícitos centrados en Maven Central para evitar respuestas 403 del mirror de Spring -->
+    <!--  Repositorios explícitos centrados en Maven Central para evitar respuestas 403 del mirror de Spring -->
     <repositories>
         <repository>
             <id>central</id>
