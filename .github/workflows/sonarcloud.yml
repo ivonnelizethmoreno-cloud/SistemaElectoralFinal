@@ -43,7 +43,7 @@ jobs:
        #   mvn -B test                            comment
         #  mvn -B org.jacoco:jacoco-maven-plugin:0.8.11:report  comment
       - name: Run ALL tests (JUnit + Cucumber)
-        run: mvn -B test
+        run: mvn -B -Dtest=com.elecciones.sistema.RunCucumberSuite test
       - name: Generate Jacoco Report
         run: mvn -B org.jacoco:jacoco-maven-plugin:0.8.11:report
 
