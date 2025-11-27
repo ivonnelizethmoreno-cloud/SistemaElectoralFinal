@@ -148,10 +148,10 @@
 
     </dependencies>
 
-    <build>
+   <!-- <build> se comentarea  de la 150 a la201
         <plugins>
 
-            <!-- Surefire (para ejecutar Cucumber + JUnit 5) -->
+            <!-- Surefire (para ejecutar Cucumber + JUnit 5) 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -163,7 +163,7 @@
                 <!--    <includes> se aplican comentarios entre la linea 163 y 166 momentaneamente
                         <include>**/RunCucumberTest*</include>  se reemplazan por la 167 a 171
                         <include>**/*Test*</include> esto mientras se camia RunCucumberTest.java por 
-                    </includes>                      RunCucumberSuite.java -->  
+                    </includes>                      RunCucumberSuite.java -  
   
                     <includes>
                         <include>**/RunCucumberSuite.java</include>
@@ -176,7 +176,7 @@
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo -->
+            <!-- JaCoCo 
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -198,7 +198,42 @@
             </plugin>
 
         </plugins>
-    </build>
+    </build> -->
+    <build>
+      <plugins>
+
+         <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-surefire-plugin</artifactId>
+           <version>3.2.5</version>
+           <configuration>
+             <useModulePath>false</useModulePath>
+
+             <includes>
+               <include>**/*Test.java</include>
+               <include>**/*Suite.java</include>
+             </includes>
+           </configuration>
+         </plugin>
+
+         <plugin>
+           <groupId>org.jacoco</groupId>
+           <artifactId>jacoco-maven-plugin</artifactId>
+           <version>${jacoco.version}</version>
+           <executions>
+             <execution>
+               <goals><goal>prepare-agent</goal></goals>
+             </execution>
+             <execution>
+               <id>report</id>
+               <phase>verify</phase>
+               <goals><goal>report</goal></goals>
+             </execution>
+           </executions>
+          </plugin>
+
+        </plugins>
+     </build>
 
 </project>
 
