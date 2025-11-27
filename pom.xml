@@ -151,7 +151,7 @@
    <!-- <build> se comentarea  de la 150 a la201
         <plugins>
 
-            <!-- Surefire (para ejecutar Cucumber + JUnit 5) 
+             Surefire (para ejecutar Cucumber + JUnit 5) 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -160,7 +160,7 @@
                     <useModulePath>false</useModulePath>
                     <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
-                <!--    <includes> se aplican comentarios entre la linea 163 y 166 momentaneamente
+                <   <includes> se aplican comentarios entre la linea 163 y 166 momentaneamente
                         <include>**/RunCucumberTest*</include>  se reemplazan por la 167 a 171
                         <include>**/*Test*</include> esto mientras se camia RunCucumberTest.java por 
                     </includes>                      RunCucumberSuite.java -  
@@ -176,7 +176,7 @@
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo 
+             JaCoCo 
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
