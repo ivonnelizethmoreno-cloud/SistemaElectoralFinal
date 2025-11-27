@@ -26,19 +26,15 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # 3. Ejecutar TODAS las pruebas JUnit + Jacoco
+      # 3. Ejecutar pruebas unitarias + Jacoco (JUnit)
       - name: Run JUnit + Jacoco
         run: mvn -B clean verify
 
-      # 4. Ejecutar Cucumber explícitamente (ESTE PASO ES CLAVE)
-      - name: Run Cucumber (JUnit 5)
-        run: |
-          mvn -B -ntp test \
-            -Dtest=com.elecciones.sistema.RunCucumberSuite \
-            -Dcucumber.features=src/test/resources/features \
-            -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
+      # 4. Ejecutar SOLO Cucumber Suite JUnit 5
+      - name: Run Cucumber Suite (JUnit 5)
+        run: mvn -B -ntp test -Dtest=com.elecciones.sistema.RunCucumberSuite
 
-      # 5. Publicar reportes de Cucumber como artifact
+      # 5. Subir reportes de cucumber (HTML + JSON)
       - name: Upload Cucumber Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -49,7 +45,7 @@ jobs:
             target/**/*.json
           if-no-files-found: warn
 
-      # 6. Análisis con SonarCloud
+      # 6. SonarCloud Scan
       - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
