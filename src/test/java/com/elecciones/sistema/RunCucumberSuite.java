@@ -24,4 +24,4 @@ import static io.cucumber.junit.platform.engine.Constants.SNIPPET_TYPE_PROPERTY_
         key = SNIPPET_TYPE_PROPERTY_NAME,
         value = "camelcase"
 )
-public class RunCucumberTest { }
+public class RunCucumberSuite { }
