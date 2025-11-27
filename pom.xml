@@ -3,12 +3,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-  <!-- comentariar este bloque 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.2</version>
-    </parent> -->
 
     <groupId>com.elecciones</groupId>
     <artifactId>SistemaElectoralFinal</artifactId>
@@ -33,10 +27,10 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement> -->
-        <!-- Repositorios explícitos para evitar bloqueos 403 al descargar el parent y las dependencias -->
-        <!-- line 39 a 66 --> 
-  <!--  <repositories>
+    </dependencyManagement> 
+         Repositorios explícitos para evitar bloqueos 403 al descargar el parent y las dependencias 
+        line 39 a 66 
+   <repositories>
         <repository>
             <id>spring-release</id>
             <name>Spring Release Repository</name>
@@ -62,8 +56,8 @@
             <name>Maven Central Plugins</name>
             <url>https://repo.maven.apache.org/maven2</url>
         </pluginRepository>
-    </pluginRepositories> -->
-      <!-- Repositorios explícitos centrados en Maven Central para evitar respuestas 403 del mirror de Spring -->
+    </pluginRepositories> 
+      Repositorios explícitos centrados en Maven Central para evitar respuestas 403 del mirror de Spring -->
     <repositories>
         <repository>
             <id>central</id>
@@ -112,6 +106,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring-boot.version}</version>
+            <version>3.2.2</version>
         </dependency>
 
         <dependency>
