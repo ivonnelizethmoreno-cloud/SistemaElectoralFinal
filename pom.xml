@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
+  <!-- comentariar este bloque 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.2</version>
-    </parent>
+    </parent> -->
 
     <groupId>com.elecciones</groupId>
     <artifactId>SistemaElectoralFinal</artifactId>
@@ -22,7 +22,7 @@
         <jacoco.version>0.8.11</jacoco.version>
     </properties>
 
-    <!-- Gestión del BOM de Cucumber -->
+    <!-- Gestión del BOM de Cucumber 
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -33,15 +33,15 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>
+    </dependencyManagement> -->
         <!-- Repositorios explícitos para evitar bloqueos 403 al descargar el parent y las dependencias -->
         <!-- line 39 a 66 --> 
-    <repositories>
-      <!--  <repository>
+  <!--  <repositories>
+        <repository>
             <id>spring-release</id>
             <name>Spring Release Repository</name>
             <url>https://repo.spring.io/release</url>
-        </repository> --> 
+        </repository> 
         <repository>
             <id>central</id>
             <name>Maven Central</name>
@@ -52,39 +52,85 @@
     </repositories>
 
     <pluginRepositories>
-      <!--  <pluginRepository>
+       <pluginRepository>
             <id>spring-plugin-release</id>
             <name>Spring Plugin Repository</name>
             <url>https://repo.spring.io/release</url>
-        </pluginRepository> --> 
+        </pluginRepository> 
         <pluginRepository>
             <id>central-plugins</id>
             <name>Maven Central Plugins</name>
             <url>https://repo.maven.apache.org/maven2</url>
         </pluginRepository>
-    </pluginRepositories>
+    </pluginRepositories> -->
+      <!-- Repositorios explícitos centrados en Maven Central para evitar respuestas 403 del mirror de Spring -->
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+        <repository>
+            <id>central-mirror</id>
+            <name>Central Mirror (repo1)</name>
+            <url>https://repo1.maven.org/maven2</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+        <repository>
+            <id>aliyun-public</id>
+            <name>Aliyun Public Mirror</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central-plugins</id>
+            <name>Maven Central Plugins</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>central-plugins-mirror</id>
+            <name>Central Plugins Mirror (repo1)</name>
+            <url>https://repo1.maven.org/maven2</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>aliyun-plugins</id>
+            <name>Aliyun Plugins Mirror</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </pluginRepository>
+    </pluginRepositories>    
     <dependencies>
 
         <!-- SPRING -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
 
         <!-- BD -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <version>2.2.224</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -99,6 +145,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.30</version>     
             <optional>true</optional>
         </dependency>
 
@@ -126,14 +173,14 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
-     <!--       <version>${cucumber.version}</version>      se agrega esta linea -->        
+            <version>${cucumber.version}</version>           
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit-platform-engine</artifactId>
-       <!--     <version>${cucumber.version}</version>      se agrega esta linea -->     
+            <version>${cucumber.version}</version>    
             <scope>test</scope>
         </dependency>
 
@@ -141,7 +188,7 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-picocontainer</artifactId>
-   <!--         <version>${cucumber.version}</version>      se agrega esta linea -->     
+            <version>${cucumber.version}</version>    
             <scope>test</scope>
         </dependency>
 
@@ -165,6 +212,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
