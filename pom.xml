@@ -98,14 +98,14 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
-            <version>${cucumber.version}</version>     <!-- se agrega esta linea -->        
+     <!--       <version>${cucumber.version}</version>      se agrega esta linea -->        
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit-platform-engine</artifactId>
-            <version>${cucumber.version}</version>     <!-- se agrega esta linea -->     
+       <!--     <version>${cucumber.version}</version>      se agrega esta linea -->     
             <scope>test</scope>
         </dependency>
 
@@ -113,7 +113,7 @@
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-picocontainer</artifactId>
-            <version>${cucumber.version}</version>     <!-- se agrega esta linea -->     
+   <!--         <version>${cucumber.version}</version>      se agrega esta linea -->     
             <scope>test</scope>
         </dependency>
 
