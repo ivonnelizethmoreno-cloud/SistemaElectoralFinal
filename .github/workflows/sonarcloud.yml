@@ -24,11 +24,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # EJECUTAR TODAS LAS PRUEBAS (JUnit + Cucumber) + Jacoco
       - name: Build & Test (JUnit + Cucumber + Jacoco)
         run: mvn -B clean verify
 
-      # PUBLICAR REPORTES CUCUMBER
       - name: Upload Cucumber Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -39,7 +37,6 @@ jobs:
             target/**/*.json
           if-no-files-found: warn
 
-      # SONARCLOUD
       - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,4 +48,13 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
           -Dsonar.branch.name=master
+
+          # 👇 NECESARIO PARA QUE YA NO DIGA "Results from surefire were not found"
+          -Dsonar.tests=src/test/java
+          -Dsonar.junit.reportPaths=target/surefire-reports
+
+          # 👇 Jacoco Coverage
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+
+          # 👇 (Opcional pero recomendado)
+          -Dsonar.cucumber.reportPaths=target/cucumber.json
