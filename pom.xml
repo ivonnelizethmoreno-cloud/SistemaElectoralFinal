@@ -16,7 +16,7 @@
         <jacoco.version>0.8.11</jacoco.version>
     </properties>
 
-    <!-- Gestión del BOM de Cucumber 
+     Gestión del BOM de Cucumber 
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -28,7 +28,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement> 
-         Repositorios explícitos para evitar bloqueos 403 al descargar el parent y las dependencias 
+         <!-- Repositorios explícitos para evitar bloqueos 403 al descargar el parent y las dependencias 
         line 39 a 66 
    <repositories>
         <repository>
@@ -43,7 +43,7 @@
             <releases><enabled>true</enabled></releases>
             <snapshots><enabled>false</enabled></snapshots>
         </repository>
-    </repositories>
+    </repositories> -->
 
     <pluginRepositories>
        <pluginRepository>
@@ -219,7 +219,7 @@
 
     </dependencies>
 
-   <!-- <build> se comentarea  de la 150 a la201
+   < <build> se comentarea  de la 150 a la201
         <plugins>
 
              Surefire (para ejecutar Cucumber + JUnit 5) 
@@ -269,7 +269,7 @@
             </plugin>
 
         </plugins>
-    </build> -->
+    </build> 
     <build>
       <plugins>
 
