@@ -32,14 +32,20 @@ jobs:
 # habrá que compilar y empaquetar el proyecto cuando el 
 # pom.xml esté integro proximas 2 lines, vamos a comentariar
 # lines 30 and 31 y habilitar 35 y 36
-      - name: Build with Maven
-        run: mvn -B package -DskipTests --file pom.xml
-
+     # - name: Build with Maven                 ultimas lines
+      #  run: mvn -B package -DskipTests --file pom.xml    comment comment
+      - name: Compile only
+        run: mvn -B -DskipTests compile
+ 
       # 4. Ejecutar pruebas unitarias + Jacoco
-      - name: Run Unit Tests + Jacoco
-        run: |
-          mvn -B test
-          mvn -B org.jacoco:jacoco-maven-plugin:0.8.11:report
+     # - name: Run Unit Tests + Jacoco    ultimas
+      #  run: |                                lines
+       #   mvn -B test                            comment
+        #  mvn -B org.jacoco:jacoco-maven-plugin:0.8.11:report  comment
+      - name: Run ALL tests (JUnit + Cucumber)
+        run: mvn -B test
+      - name: Generate Jacoco Report
+        run: mvn -B org.jacoco:jacoco-maven-plugin:0.8.11:report
 
       # 5. Ejecutar Cucumber Tests
      # - name: Run Cucumber Tests
@@ -54,8 +60,8 @@ jobs:
         #    -Dcucumber.features=src/test/resources/features \
        #     -Dcucumber.glue=com.elecciones.sistema.steps \
        #   -Dcucumber.plugin="pretty,html:target/cucumber-report.html,json:target/cucumber.json"
-      - name: Run Cucumber (JUnit 5)
-        run: mvn -B -ntp test
+   #   - name: Run Cucumber (JUnit 5)   ultimas lines
+     #   run: mvn -B -ntp test             comment comment
 
        # -Dcucumber.execution.strict=false \
 # reemplazando lneas 50 a 54 haremos la prueba con estas e lines, vamos a comentar lines 58 a 61
