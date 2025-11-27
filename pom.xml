@@ -7,16 +7,16 @@
     <groupId>com.elecciones</groupId>
     <artifactId>SistemaElectoralFinal</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>
 
     <properties>
         <java.version>17</java.version>
+        <spring-boot.version>3.2.2</spring-boot.version>
         <cucumber.version>7.18.1</cucumber.version>
         <junit.version>5.10.2</junit.version>
         <jacoco.version>0.8.11</jacoco.version>
     </properties>
 
-   <!--  Gestión del BOM de Cucumber -->
+    <!-- BOM de cucumber -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -27,78 +27,23 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement> 
-         <!-- Repositorios explícitos para evitar bloqueos 403 al descargar el parent y las dependencias 
-        line 39 a 66 
-   <repositories>
-        <repository>
-            <id>spring-release</id>
-            <name>Spring Release Repository</name>
-            <url>https://repo.spring.io/release</url>
-        </repository> 
-        <repository>
-            <id>central</id>
-            <name>Maven Central</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>false</enabled></snapshots>
-        </repository>
-    </repositories> -->
+    </dependencyManagement>
 
-    <pluginRepositories>
-       <pluginRepository>
-            <id>spring-plugin-release</id>
-            <name>Spring Plugin Repository</name>
-            <url>https://repo.spring.io/release</url>
-        </pluginRepository> 
-        <pluginRepository>
-            <id>central-plugins</id>
-            <name>Maven Central Plugins</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </pluginRepository>
-    </pluginRepositories> 
-    <!--  Repositorios explícitos centrados en Maven Central para evitar respuestas 403 del mirror de Spring -->
+    <!-- Repositorios -->
     <repositories>
         <repository>
             <id>central</id>
-            <name>Maven Central</name>
             <url>https://repo.maven.apache.org/maven2</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>false</enabled></snapshots>
-        </repository>
-        <repository>
-            <id>central-mirror</id>
-            <name>Central Mirror (repo1)</name>
-            <url>https://repo1.maven.org/maven2</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>false</enabled></snapshots>
-        </repository>
-        <repository>
-            <id>aliyun-public</id>
-            <name>Aliyun Public Mirror</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>false</enabled></snapshots>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
             <id>central-plugins</id>
-            <name>Maven Central Plugins</name>
             <url>https://repo.maven.apache.org/maven2</url>
         </pluginRepository>
-        <pluginRepository>
-            <id>central-plugins-mirror</id>
-            <name>Central Plugins Mirror (repo1)</name>
-            <url>https://repo1.maven.org/maven2</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>aliyun-plugins</id>
-            <name>Aliyun Plugins Mirror</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-        </pluginRepository>
-    </pluginRepositories>    
+    </pluginRepositories>
+
     <dependencies>
 
         <!-- SPRING -->
@@ -106,7 +51,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring-boot.version}</version>
-            <version>3.2.2</version>
         </dependency>
 
         <dependency>
@@ -125,7 +69,6 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.2.224</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -140,7 +83,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.30</version>     
             <optional>true</optional>
         </dependency>
 
@@ -148,7 +90,6 @@
         <!--       TESTING             -->
         <!-- ========================= -->
 
-        <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -156,7 +97,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit Platform Suite (OBLIGATORIO PARA CUCUMBER) -->
+        <!-- JUnit Platform Suite -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-api</artifactId>
@@ -164,26 +105,22 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Cucumber (para JUnit 5) -->
+        <!-- Cucumber -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
-            <version>${cucumber.version}</version>           
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit-platform-engine</artifactId>
-            <version>${cucumber.version}</version>    
             <scope>test</scope>
         </dependency>
 
-        <!-- Necesario para DI en Steps -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-picocontainer</artifactId>
-            <version>${cucumber.version}</version>    
             <scope>test</scope>
         </dependency>
 
@@ -195,7 +132,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- AssertJ (solo una vez) -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
@@ -203,7 +139,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Spring Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -219,92 +154,45 @@
 
     </dependencies>
 
-   < <build> se comentarea  de la 150 a la201
+    <!-- ========================= -->
+    <!-- BUILD CORRECTO Y LIMPIO   -->
+    <!-- ========================= -->
+    <build>
         <plugins>
 
-             Surefire (para ejecutar Cucumber + JUnit 5) 
+            <!-- Surefire -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
                     <useModulePath>false</useModulePath>
-                    <forkCount>1</forkCount>
-                    <reuseForks>true</reuseForks>
-                <   <includes> se aplican comentarios entre la linea 163 y 166 momentaneamente
-                        <include>**/RunCucumberTest*</include>  se reemplazan por la 167 a 171
-                        <include>**/*Test*</include> esto mientras se camia RunCucumberTest.java por 
-                    </includes>                      RunCucumberSuite.java -  
-  
                     <includes>
-                        <include>**/RunCucumberSuite.java</include>
-                        <include>**/*Test*</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*Suite.java</include>
                     </includes>
-
-                    <systemPropertyVariables>
-                        <cucumber.junit-platform.naming-strategy>long</cucumber.junit-platform.naming-strategy>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
-             JaCoCo 
+            <!-- Jacoco -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
                 <executions>
                     <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
+                        <goals><goal>prepare-agent</goal></goals>
                     </execution>
                     <execution>
                         <id>report</id>
                         <phase>verify</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
+                        <goals><goal>report</goal></goals>
                     </execution>
                 </executions>
             </plugin>
 
         </plugins>
-    </build> 
-    <build>
-      <plugins>
-
-         <plugin>
-           <groupId>org.apache.maven.plugins</groupId>
-           <artifactId>maven-surefire-plugin</artifactId>
-           <version>3.2.5</version>
-           <configuration>
-             <useModulePath>false</useModulePath>
-
-             <includes>
-               <include>**/*Test.java</include>
-               <include>**/*Suite.java</include>
-             </includes>
-           </configuration>
-         </plugin>
-
-         <plugin>
-           <groupId>org.jacoco</groupId>
-           <artifactId>jacoco-maven-plugin</artifactId>
-           <version>${jacoco.version}</version>
-           <executions>
-             <execution>
-               <goals><goal>prepare-agent</goal></goals>
-             </execution>
-             <execution>
-               <id>report</id>
-               <phase>verify</phase>
-               <goals><goal>report</goal></goals>
-             </execution>
-           </executions>
-          </plugin>
-
-        </plugins>
-     </build>
+    </build>
 
 </project>
 
