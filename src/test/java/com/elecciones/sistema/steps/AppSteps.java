@@ -1,5 +1,5 @@
-package com.elecciones.steps;
-
+/* package com.elecciones.steps; */
+package com.elecciones.sistema.steps; 
 import io.cucumber.java.es.*;
 
 import static org.junit.jupiter.api.Assertions.*;
