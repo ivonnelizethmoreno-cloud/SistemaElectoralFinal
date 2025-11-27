@@ -37,11 +37,11 @@
         <!-- Repositorios explícitos para evitar bloqueos 403 al descargar el parent y las dependencias -->
         <!-- line 39 a 66 --> 
     <repositories>
-        <repository>
+      <!--  <repository>
             <id>spring-release</id>
             <name>Spring Release Repository</name>
             <url>https://repo.spring.io/release</url>
-        </repository>
+        </repository> --> 
         <repository>
             <id>central</id>
             <name>Maven Central</name>
@@ -52,11 +52,11 @@
     </repositories>
 
     <pluginRepositories>
-        <pluginRepository>
+      <!--  <pluginRepository>
             <id>spring-plugin-release</id>
             <name>Spring Plugin Repository</name>
             <url>https://repo.spring.io/release</url>
-        </pluginRepository>
+        </pluginRepository> --> 
         <pluginRepository>
             <id>central-plugins</id>
             <name>Maven Central Plugins</name>
