@@ -166,8 +166,8 @@
                     </includes>                      RunCucumberSuite.java -->  
   
                     <includes>
-                        <include>**/*Suite.java</include>
-                        <include>**/*Test*.java</include>
+                        <include>**/RunCucumberSuite.java</include>
+                        <include>**/*Test.java</include>
                     </includes>
 
                     <systemPropertyVariables>
