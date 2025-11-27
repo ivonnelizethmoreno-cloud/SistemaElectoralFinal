@@ -4,7 +4,6 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 🔥 EL PARENT SE USA SIEMPRE CON SPRING BOOT -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -24,7 +23,7 @@
         <jacoco.version>0.8.11</jacoco.version>
     </properties>
 
-    <!-- BOM DE CUCUMBER: controla las versiones -->
+    <!-- Gestión de versiones para Cucumber -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -37,10 +36,9 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- 📦 DEPENDENCIAS -->
     <dependencies>
 
-        <!-- SPRING -->
+        <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -56,7 +54,7 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- BD -->
+        <!-- Base de datos -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -78,7 +76,7 @@
         </dependency>
 
         <!-- ========================= -->
-        <!--       TESTING             -->
+        <!--         TESTING           -->
         <!-- ========================= -->
 
         <!-- JUnit 5 -->
@@ -88,7 +86,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit Platform Suite (requerida por Cucumber) -->
+        <!-- JUnit Platform Suite (para Cucumber) -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-api</artifactId>
@@ -96,7 +94,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Cucumber -->
+        <!-- Cucumber + JUnit 5 -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
@@ -146,11 +144,11 @@
 
     </dependencies>
 
-    <!-- 🔧 PLUGINS -->
+    <!-- Plugins -->
     <build>
         <plugins>
 
-            <!-- SUREFIRE (JUnit + Cucumber) -->
+            <!-- SUREFIRE: Ejecuta JUnit + Cucumber y genera reportes -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -162,10 +160,20 @@
                         <include>**/*Test.java</include>
                         <include>**/*Suite.java</include>
                     </includes>
+
+                    <systemPropertyVariables>
+                        <cucumber.junit-platform.naming-strategy>long
+                        </cucumber.junit-platform.naming-strategy>
+
+                        <!-- 🔥 CLAVE PARA QUE SE GENEREN REPORTES HTML/JSON -->
+                        <cucumber.plugin>
+                            pretty, html:target/cucumber-report.html, json:target/cucumber.json
+                        </cucumber.plugin>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
-            <!-- JACOCO -->
+            <!-- Jacoco -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
