@@ -7,6 +7,10 @@ on:
     branches: [ "master" ]
 
 jobs:
+
+  # ============================================================
+  #                     JOB 1: BUILD + TESTS
+  # ============================================================
   build:
     runs-on: ubuntu-latest
 
@@ -24,11 +28,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # ➤ Ejecuta TODO: JUnit + Cucumber Suite + Jacoco
       - name: Run JUnit + Cucumber + Jacoco
         run: mvn -B clean verify
 
-      # ➤ Publicar reportes Cucumber generados por Surefire
       - name: Upload Cucumber Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -39,7 +41,6 @@ jobs:
             target/**/*.json
           if-no-files-found: warn
 
-      # ➤ SonarCloud
       - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,14 +54,32 @@ jobs:
           -Dsonar.branch.name=master
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
-      # ➤ CD: Construir el JAR final para desplegar
       - name: Build deployable JAR
         run: mvn -B package -DskipTests
 
-      # ➤ CD: Publicar el artifact del JAR (deploy)
-      - name: Upload JAR Artifact
+      - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
-          name: deploy-jar
+          name: app-jar
           path: target/*.jar
           if-no-files-found: error
+
+
+  # ============================================================
+  #                     JOB 2: DEPLOY (CD)
+  # ============================================================
+  deploy:
+    needs: build    # <--- MUY IMPORTANTE
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+
+      - name: "Deploy: listo para distribución"
+        run: |
+          echo "Jar descargado y listo para despliegue"
+          ls -l
