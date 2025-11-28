@@ -1,4 +1,4 @@
-name: CI - Tests + Cucumber + SonarCloud
+name: CI - Tests + Cucumber + SonarCloud + CD JAR
 
 on:
   push:
@@ -12,11 +12,13 @@ jobs:
 
     steps:
 
+      # 1. Código fuente
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2. Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -24,11 +26,23 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # ➤ Ejecuta TODO: JUnit + Cucumber Suite + Jacoco
+      # 3. Ejecutar TODAS las pruebas + Jacoco + Cucumber
       - name: Run JUnit + Cucumber + Jacoco
         run: mvn -B clean verify
 
-      # ➤ Publicar reportes Cucumber generados por Surefire
+      # 4. Construir JAR ejecutable (Spring Boot repackage)
+      - name: Build Executable JAR
+        run: mvn -B package -DskipTests
+
+      # 5. Subir el JAR como artifact (esto es el CD)
+      - name: Upload Executable JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: sistema-electoral-jar
+          path: target/*.jar
+          if-no-files-found: error
+
+      # 6. Subir reportes de Cucumber
       - name: Upload Cucumber Reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -39,7 +53,7 @@ jobs:
             target/**/*.json
           if-no-files-found: warn
 
-      # ➤ SonarCloud
+      # 7. SonarCloud
       - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
