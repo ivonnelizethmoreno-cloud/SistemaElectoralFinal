@@ -14,7 +14,6 @@
     <groupId>com.elecciones</groupId>
     <artifactId>SistemaElectoralFinal</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>
 
     <properties>
         <java.version>17</java.version>
@@ -23,9 +22,11 @@
         <jacoco.version>0.8.11</jacoco.version>
     </properties>
 
-    <!-- Gestión de versiones para Cucumber -->
+    <!-- 🔥 FIX REAL DEL PROBLEMA: UNIFICAR VERSIONES DE JUNIT -->
     <dependencyManagement>
         <dependencies>
+
+            <!-- BOM Cucumber -->
             <dependency>
                 <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-bom</artifactId>
@@ -33,6 +34,16 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- BOM JUnit - evita conflictos de versiones -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -54,7 +65,7 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- Base de datos -->
+        <!-- DB -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -75,34 +86,32 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- ========================= -->
-        <!--         TESTING           -->
-        <!-- ========================= -->
+        <!-- ===================== -->
+        <!--        TESTING        -->
+        <!-- ===================== -->
 
-        <!-- JUnit 5 -->
+        <!-- JUnit 5 (hereda versión del BOM) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit Platform Suite (para Cucumber) -->
+        <!-- API Suite -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-api</artifactId>
-            <version>1.10.2</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit Platform Suite ENGINE (necesario para @Suite + @IncludeEngines) -->
+        <!-- ENGINE Suite -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-engine</artifactId>
-            <version>1.10.2</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- Cucumber + JUnit 5 -->
+        <!-- Cucumber -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
@@ -152,36 +161,24 @@
 
     </dependencies>
 
-    <!-- Plugins -->
+    <!-- PLUGINS -->
     <build>
         <plugins>
 
-            <!-- SUREFIRE: Ejecuta JUnit + Cucumber y genera reportes -->
+            <!-- SUREFIRE -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <useModulePath>false</useModulePath>
-
                     <includes>
                         <include>**/*Test.java</include>
                         <include>**/*Suite.java</include>
                     </includes>
-
-                    <systemPropertyVariables>
-                        <cucumber.junit-platform.naming-strategy>long
-                        </cucumber.junit-platform.naming-strategy>
-
-                        <!-- 🔥 CLAVE PARA QUE SE GENEREN REPORTES HTML/JSON -->
-                        <cucumber.plugin>
-                            pretty, html:target/cucumber-report.html, json:target/cucumber.json
-                        </cucumber.plugin>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
-            <!-- Jacoco -->
+            <!-- JACOCO -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
