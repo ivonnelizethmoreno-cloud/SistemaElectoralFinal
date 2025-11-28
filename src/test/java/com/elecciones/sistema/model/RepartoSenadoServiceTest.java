@@ -1,4 +1,4 @@
-package config;
+package com.elecciones.sistema.model;
 
 import com.elecciones.sistema.repo.EligeRepository;
 import org.junit.jupiter.api.BeforeEach;
