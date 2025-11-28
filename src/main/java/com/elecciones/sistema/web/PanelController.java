@@ -30,8 +30,6 @@ public class PanelController {
     private final PasswordEncoder passwordEncoder;
     private final RepartoSenadoService repartoService;
     private final SimulacionProgresoService progresoService;
-    
-    private static final Random RANDOM = new Random();
 
     // ===========================================================
     // PANEL PRINCIPAL
@@ -411,12 +409,12 @@ public class PanelController {
 
         // Votantes pendientes de votar
         List<UserAccount> votantesPendientes = userAccountRepository.findAll()
-            .stream()
-            .filter(u -> "VOTANTE".equalsIgnoreCase(u.getRole()) && !u.isHaVotado())
-            .toList();
+                .stream()
+                .filter(u -> "VOTANTE".equalsIgnoreCase(u.getRole()) && !u.isHaVotado())
+                .toList();
 
         List<Candidato> candidatos = candidatoRepository.findAll();
-        Random random = Random();
+        Random random = new Random();
 
         if (votantesPendientes.isEmpty()) {
             progresoService.reset(0);
