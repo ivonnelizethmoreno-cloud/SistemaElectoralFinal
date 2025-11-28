@@ -97,19 +97,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- API Suite -->
+        <!-- API Suite
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-api</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- ENGINE Suite -->
+        ENGINE Suite 
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-engine</artifactId>
             <scope>test</scope>
-        </dependency>
+        </dependency> -->
 
         <!-- Cucumber -->
         <dependency>
@@ -163,6 +163,17 @@
 
     <!-- PLUGINS -->
     <build>
+              <!-- NECESARIO PARA QUE MAVEN CARGUE LOS .feature EN GITHUB ACTIONS -->
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>**/*.feature</include>
+                </includes>
+            </testResource>
+        </testResources>
+
+        
         <plugins>
 
             <!-- SUREFIRE -->
