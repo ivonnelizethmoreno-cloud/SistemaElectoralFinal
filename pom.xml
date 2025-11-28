@@ -167,9 +167,9 @@
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
-                <includes>
+               <!-- <includes>
                     <include>**/*.feature</include>
-                </includes>
+                </includes> -->
             </testResource>
         </testResources>
 
