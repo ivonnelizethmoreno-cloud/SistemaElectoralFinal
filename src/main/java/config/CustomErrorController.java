@@ -1,4 +1,4 @@
-package com.elecciones.sistema.config;
+package config;
 
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
