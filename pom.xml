@@ -194,6 +194,7 @@
                 <version>3.2.5</version>
                 <configuration>
                   <!--  <testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory> -->
+                    <useModulePath>false</useModulePath>
                     <failIfNoTests>false</failIfNoTests>    
                     <includes>
                         <include>**/RunCucumberTest.java</include>
